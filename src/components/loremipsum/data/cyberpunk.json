@@ -1,15 +1,20 @@
-
 {
   "words": [
-    "cyberpunk", "néon", "mégacorporation", "corpo", "hacker", "netrunner", "réseau", 
-    "matrice", "cyberespace", "réalité virtuelle", "augmentée", "implant", "cybernétique", 
-    "prothèse", "enhancement", "augmentation", "wetware", "hardware", "software", 
-    "interface", "neural", "synaptique", "cerveau", "conscience", "upload", "download", 
-    "backup", "clone", "mémoire", "souvenir", "simulation", "dystopie", "urbain", 
-    "mégalopole", "arcologie", "bidonville", "ghetto", "haute ville", "basse ville", 
-    "underground", "ruelle", "pluie", "pollution", "smog", "acide", "toxique", "drone", 
-    "robot", "androïde", "IA", "singularité", "technologique", "blade runner", "transhumain", 
-    "posthumain", "biopunk", "nanopunk", "solarpunk", "streetware", "synthwave", 
-    "rétrofuturisme", "lowlife", "hightech"
+    "cyberpunk", "néon", "mégacorporation", "corpo", "hacker", "netrunner", "réseau",
+    "matrice", "cyberespace", "réalité virtuelle", "augmentée", "implant", "cybernétique",
+    "prothèse", "enhancement", "augmentation", "wetware", "hardware", "software",
+    "interface", "neural", "synaptique", "cerveau", "conscience", "upload", "download",
+    "backup", "clone", "mémoire", "souvenir", "simulation", "dystopie", "urbain",
+    "mégalopole", "arcologie", "bidonville", "ghetto", "haute ville", "basse ville",
+    "underground", "ruelle", "pluie", "pollution", "smog", "acide", "toxique", "drone",
+    "robot", "androïde", "IA", "singularité", "technologique", "blade runner", "transhumain",
+    "posthumain", "biopunk", "nanopunk", "solarpunk", "streetware", "synthwave",
+    "rétrofuturisme", "lowlife", "hightech",
+    "glitch", "cyberattaque", "cryptographie", "blockchain", "cryptomonnaie", "hacktivisme",
+    "virtualité", "immersion", "interface neuronale", "hack", "firewall", "deep web",
+    "surface web", "virtualisation", "hyperréalité", "cybersécurité", "data", "données",
+    "pixel", "hologramme", "code", "virus", "antivirus", "technomancien", "cyberculture",
+    "rébellion", "anarchie", "anonymat", "incubateur", "circuit", "décalage", "révolte",
+    "simulacre", "interface holographique", "dystopique", "anticonformisme", "pixélisé"
   ]
 }

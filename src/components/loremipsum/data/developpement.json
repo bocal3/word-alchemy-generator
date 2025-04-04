@@ -1,0 +1,13 @@
+
+{
+  "words": [
+    "code", "programme", "développement", "logiciel", "application", "web", "mobile", 
+    "frontend", "backend", "fullstack", "API", "serveur", "client", "base de données", 
+    "SQL", "NoSQL", "framework", "bibliothèque", "librairie", "fonction", "méthode", 
+    "classe", "objet", "variable", "constante", "boucle", "condition", "algorithme", 
+    "structure", "données", "type", "interface", "composant", "module", "package", 
+    "dépendance", "version", "git", "commit", "push", "pull", "merge", "branch", "fork", 
+    "clone", "repository", "déploiement", "CI/CD", "test", "debug", "exception", "erreur", 
+    "compilation", "interprétation", "runtime", "refactoring", "pattern", "architecture"
+  ]
+}

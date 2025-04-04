@@ -1,12 +1,19 @@
-
 {
   "words": [
-    "bière", "houblon", "malt", "orge", "levure", "fermentation", "brassage", "brasserie", 
-    "microbrasserie", "pinte", "chope", "mousse", "blonde", "brune", "rousse", "ambrée", 
-    "blanche", "stout", "porter", "ipa", "ale", "lager", "pilsner", "trappiste", "abbaye", 
-    "belge", "allemande", "anglaise", "américaine", "artisanale", "pression", "bouteille", 
-    "canette", "fût", "dégustation", "amertume", "ibu", "alcool", "arôme", "saveur", 
-    "maltée", "houblonnée", "fruitée", "épicée", "brasseur", "craft", "session", "impériale", 
-    "triple", "quadruple", "saison", "sour", "gueuze", "lambic", "kriek"
+    "bière", "houblon", "malt", "orge", "levure", "fermentation", "brassage", "brasserie",
+    "microbrasserie", "pinte", "chope", "mousse", "blonde", "brune", "rousse", "ambrée",
+    "blanche", "stout", "porter", "ipa", "ale", "lager", "pilsner", "trappiste", "abbaye",
+    "belge", "allemande", "anglaise", "américaine", "artisanale", "pression", "bouteille",
+    "canette", "fût", "dégustation", "amertume", "ibu", "alcool", "arôme", "saveur",
+    "maltée", "houblonnée", "fruitée", "épicée", "brasseur", "craft", "session", "impériale",
+    "triple", "quadruple", "saison", "sour", "gueuze", "lambic", "kriek",
+    "cervoise", "biérologie", "biérologue", "fermenté", "bière de garde", "bière d'abbaye",
+    "fermentation spontanée", "sans gluten", "cuvée", "barrique", "torréfiée", "capsule",
+    "houblon aromatique", "houblon amer", "houblon floral", "bière bio", "bière artisanale",
+    "bière de saison", "brasseur amateur", "brasseur professionnel", "tonic", "bitter",
+    "bock", "vienna", "scotch ale", "doppelbock", "bière d'hiver", "bière estivale",
+    "fermentation haute", "fermentation basse", "bière pressurisée", "bière en fût",
+    "bière de tradition", "recette secrète", "infusion", "extracteur", "cervoise",
+    "hydromel", "spécialité", "créatif", "innovation", "brasseur passionné"
   ]
 }

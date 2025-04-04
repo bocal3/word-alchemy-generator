@@ -8,6 +8,14 @@ export interface Dictionary {
 export interface GenerateLoremParams {
   selectedDictionaries: Record<string, boolean>;
   paragraphCount: number;
+  wordsPerSentence: {
+    min: number;
+    max: number;
+  };
+  sentencesPerParagraph: {
+    min: number;
+    max: number;
+  };
 }
 
 // Function to load dictionary data
@@ -52,7 +60,12 @@ const generateRandomSentence = (words: string[], minWords: number = 5, maxWords:
 };
 
 // Main function to generate lorem ipsum text
-export const generateLorem = async ({ selectedDictionaries, paragraphCount }: GenerateLoremParams): Promise<string[]> => {
+export const generateLorem = async ({ 
+  selectedDictionaries, 
+  paragraphCount,
+  wordsPerSentence,
+  sentencesPerParagraph 
+}: GenerateLoremParams): Promise<string[]> => {
   // Get the names of selected dictionaries
   const dictNames = Object.entries(selectedDictionaries)
     .filter(([_, isSelected]) => isSelected)
@@ -76,12 +89,18 @@ export const generateLorem = async ({ selectedDictionaries, paragraphCount }: Ge
   const paragraphs = [];
   
   for (let p = 0; p < paragraphCount; p++) {
-    // Each paragraph has between 3 to 7 sentences
-    const sentenceCount = Math.floor(Math.random() * 5) + 3;
+    // Each paragraph has between min to max sentences
+    const sentenceCount = Math.floor(Math.random() * 
+      (sentencesPerParagraph.max - sentencesPerParagraph.min + 1)) + 
+      sentencesPerParagraph.min;
     
     let paragraph = '';
     for (let s = 0; s < sentenceCount; s++) {
-      paragraph += generateRandomSentence(allWords);
+      paragraph += generateRandomSentence(
+        allWords, 
+        wordsPerSentence.min, 
+        wordsPerSentence.max
+      );
       
       if (s < sentenceCount - 1) {
         paragraph += ' ';

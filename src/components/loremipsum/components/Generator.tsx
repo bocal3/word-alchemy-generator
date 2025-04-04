@@ -8,7 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
-import { Copy, RefreshCw, Check } from 'lucide-react';
+import { Copy, RefreshCw, Check, SlidersHorizontal } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const dictionaries = [
   { id: 'latin', label: 'Latin' },
@@ -60,12 +62,44 @@ const Generator: React.FC = () => {
   
   const [paragraphCount, setParagraphCount] = useState<number>(3);
   const [copied, setCopied] = useState(false);
+  const [areAllSelected, setAreAllSelected] = useState(false);
+  const [advancedOptionsOpen, setAdvancedOptionsOpen] = useState(false);
+  
+  const [wordsPerSentence, setWordsPerSentence] = useState({
+    min: 5,
+    max: 15
+  });
+  
+  const [sentencesPerParagraph, setSentencesPerParagraph] = useState({
+    min: 3,
+    max: 7
+  });
   
   const handleCheckboxChange = (id: string) => {
-    setSelectedDictionaries(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setSelectedDictionaries(prev => {
+      const updated = {
+        ...prev,
+        [id]: !prev[id]
+      };
+      
+      // Check if all dictionaries are now selected
+      const allSelected = dictionaries.every(dict => updated[dict.id]);
+      setAreAllSelected(allSelected);
+      
+      return updated;
+    });
+  };
+  
+  const handleSelectAll = () => {
+    const newValue = !areAllSelected;
+    setAreAllSelected(newValue);
+    
+    const newSelectedDictionaries: Record<string, boolean> = {};
+    dictionaries.forEach(dict => {
+      newSelectedDictionaries[dict.id] = newValue;
+    });
+    
+    setSelectedDictionaries(newSelectedDictionaries);
   };
   
   const handleParagraphCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,7 +121,12 @@ const Generator: React.FC = () => {
       return;
     }
     
-    generate({ selectedDictionaries, paragraphCount });
+    generate({ 
+      selectedDictionaries, 
+      paragraphCount,
+      wordsPerSentence,
+      sentencesPerParagraph
+    });
   };
   
   const handleCopy = () => {
@@ -101,6 +140,20 @@ const Generator: React.FC = () => {
     });
     
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleWordsPerSentenceChange = (values: number[]) => {
+    setWordsPerSentence({
+      min: values[0],
+      max: values[1]
+    });
+  };
+
+  const handleSentencesPerParagraphChange = (values: number[]) => {
+    setSentencesPerParagraph({
+      min: values[0],
+      max: values[1]
+    });
   };
 
   return (
@@ -117,7 +170,19 @@ const Generator: React.FC = () => {
       <Card className="p-6">
         <div className="space-y-6">
           <div>
-            <h2 className="font-semibold text-lg mb-3">Sélectionnez vos dictionnaires</h2>
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-semibold text-lg">Sélectionnez vos dictionnaires</h2>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="checkbox-select-all" 
+                  checked={areAllSelected} 
+                  onCheckedChange={handleSelectAll}
+                />
+                <Label htmlFor="checkbox-select-all" className="text-sm">
+                  Tout sélectionner
+                </Label>
+              </div>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {dictionaries.map((dict) => (
                 <div key={dict.id} className="flex items-center space-x-2">
@@ -148,6 +213,48 @@ const Generator: React.FC = () => {
               <span className="ml-2 text-sm text-muted-foreground">(1-10)</span>
             </div>
           </div>
+          
+          <Collapsible open={advancedOptionsOpen} onOpenChange={setAdvancedOptionsOpen} className="border rounded-md p-2">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="flex w-full justify-between">
+                <span className="flex items-center">
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  Options avancées
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {advancedOptionsOpen ? "Masquer" : "Afficher"}
+                </span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Nombre de mots par phrase: {wordsPerSentence.min} - {wordsPerSentence.max}</h3>
+                  <Slider 
+                    defaultValue={[wordsPerSentence.min, wordsPerSentence.max]}
+                    min={3}
+                    max={20}
+                    step={1}
+                    value={[wordsPerSentence.min, wordsPerSentence.max]}
+                    onValueChange={handleWordsPerSentenceChange}
+                    className="my-4"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Nombre de phrases par paragraphe: {sentencesPerParagraph.min} - {sentencesPerParagraph.max}</h3>
+                  <Slider 
+                    defaultValue={[sentencesPerParagraph.min, sentencesPerParagraph.max]}
+                    min={1}
+                    max={12}
+                    step={1}
+                    value={[sentencesPerParagraph.min, sentencesPerParagraph.max]}
+                    onValueChange={handleSentencesPerParagraphChange}
+                    className="my-4"
+                  />
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
           
           <div>
             <Button 

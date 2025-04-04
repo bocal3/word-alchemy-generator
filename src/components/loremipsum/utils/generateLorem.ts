@@ -125,6 +125,42 @@ export const generateLorem = async ({
   return paragraphs;
 };
 
+/**
+ * Découvre dynamiquement les dictionnaires disponibles dans le dossier data
+ * @returns Un tableau contenant les noms des dictionnaires disponibles
+ */
+export const discoverDictionaries = async (): Promise<string[]> => {
+  // Cette fonction est un placeholder. Dans un environnement réel avec Node.js,
+  // nous pourrions utiliser le système de fichiers pour scanner le dossier data.
+  // Avec Vite/React, nous devons lister manuellement les dictionnaires.
+  // Mais cette fonction pourrait être étendue pour charger des dictionnaires 
+  // depuis une API ou un autre point d'entrée.
+  
+  return [
+    'latin',
+    'viande',
+    'jeu',
+    'biere',
+    'hipster',
+    'survie',
+    'randonnee',
+    'outils',
+    'developpement',
+    'it',
+    'police',
+    'cuisine',
+    'photo',
+    'paranormal',
+    'startup',
+    'fantasy',
+    'cyberpunk',
+    'telerealite',
+    'philosophie'
+    // Pour ajouter un nouveau dictionnaire, ajoutez simplement son nom ici
+    // et créez un fichier JSON correspondant dans le dossier data
+  ];
+};
+
 // Custom hook to use the generator
 export const useLoremGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);

@@ -16,6 +16,7 @@ export interface GenerateLoremParams {
     min: number;
     max: number;
   };
+  generateSingleSentence?: boolean;
 }
 
 // Function to load dictionary data
@@ -64,7 +65,8 @@ export const generateLorem = async ({
   selectedDictionaries, 
   paragraphCount,
   wordsPerSentence,
-  sentencesPerParagraph 
+  sentencesPerParagraph,
+  generateSingleSentence = false
 }: GenerateLoremParams): Promise<string[]> => {
   // Get the names of selected dictionaries
   const dictNames = Object.entries(selectedDictionaries)
@@ -83,6 +85,16 @@ export const generateLorem = async ({
   
   if (allWords.length === 0) {
     return ['Aucun mot trouvé dans les dictionnaires sélectionnés.'];
+  }
+
+  // If we're generating just a single sentence
+  if (generateSingleSentence) {
+    const sentence = generateRandomSentence(
+      allWords, 
+      wordsPerSentence.min, 
+      wordsPerSentence.max
+    );
+    return [sentence];
   }
 
   // Generate paragraphs

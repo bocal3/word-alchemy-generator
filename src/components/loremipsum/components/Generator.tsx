@@ -64,6 +64,7 @@ const Generator: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [areAllSelected, setAreAllSelected] = useState(false);
   const [advancedOptionsOpen, setAdvancedOptionsOpen] = useState(false);
+  const [generateSingleSentence, setGenerateSingleSentence] = useState(false);
   
   const [wordsPerSentence, setWordsPerSentence] = useState({
     min: 5,
@@ -125,7 +126,8 @@ const Generator: React.FC = () => {
       selectedDictionaries, 
       paragraphCount,
       wordsPerSentence,
-      sentencesPerParagraph
+      sentencesPerParagraph,
+      generateSingleSentence
     });
   };
   
@@ -154,6 +156,10 @@ const Generator: React.FC = () => {
       min: values[0],
       max: values[1]
     });
+  };
+
+  const handleSingleSentenceChange = () => {
+    setGenerateSingleSentence(prev => !prev);
   };
 
   return (
@@ -199,18 +205,31 @@ const Generator: React.FC = () => {
             </div>
           </div>
           
-          <div>
-            <h2 className="font-semibold text-lg mb-3">Nombre de paragraphes</h2>
-            <div className="flex items-center w-full max-w-xs">
+          <div className="flex items-center space-x-4">
+            <div className={`flex items-center space-x-2 ${generateSingleSentence ? 'opacity-50' : ''}`}>
+              <Label htmlFor="paragraph-count" className="text-sm font-medium">Nombre de paragraphes:</Label>
               <Input
+                id="paragraph-count"
                 type="number"
                 min="1"
                 max="10"
                 value={paragraphCount}
                 onChange={handleParagraphCountChange}
-                className="w-24"
+                className="w-20"
+                disabled={generateSingleSentence}
               />
-              <span className="ml-2 text-sm text-muted-foreground">(1-10)</span>
+              <span className="text-xs text-muted-foreground">(1-10)</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="single-sentence" 
+                checked={generateSingleSentence} 
+                onCheckedChange={handleSingleSentenceChange}
+              />
+              <Label htmlFor="single-sentence" className="text-sm">
+                Générer une seule phrase
+              </Label>
             </div>
           </div>
           
@@ -240,7 +259,7 @@ const Generator: React.FC = () => {
                     className="my-4"
                   />
                 </div>
-                <div>
+                <div className={generateSingleSentence ? 'opacity-50' : ''}>
                   <h3 className="text-sm font-medium mb-2">Nombre de phrases par paragraphe: {sentencesPerParagraph.min} - {sentencesPerParagraph.max}</h3>
                   <Slider 
                     defaultValue={[sentencesPerParagraph.min, sentencesPerParagraph.max]}
@@ -250,6 +269,7 @@ const Generator: React.FC = () => {
                     value={[sentencesPerParagraph.min, sentencesPerParagraph.max]}
                     onValueChange={handleSentencesPerParagraphChange}
                     className="my-4"
+                    disabled={generateSingleSentence}
                   />
                 </div>
               </div>

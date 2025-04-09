@@ -1,3 +1,3 @@
 
-export { default as Generator } from './components/Generator';
+export { default as LoremGenerator } from './components/Generator';
 export { generateLorem, useLoremGenerator } from './utils/generateLorem';

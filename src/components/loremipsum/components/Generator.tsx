@@ -155,7 +155,7 @@ const Generator: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold text-spotify">
           Générateur de Lorem Ipsum Thématique
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -197,7 +197,7 @@ const Generator: React.FC = () => {
           <div>
             <Button 
               onClick={handleGenerate} 
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
               disabled={isGenerating}
             >
               {isGenerating ? (

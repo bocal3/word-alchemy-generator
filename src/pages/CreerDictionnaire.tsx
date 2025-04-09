@@ -8,12 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const CreerDictionnaire = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [words, setWords] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +38,39 @@ const CreerDictionnaire = () => {
       });
       return;
     }
+
+    setIsSubmitting(true);
     
-    toast({
-      title: "Dictionnaire créé",
-      description: `Le dictionnaire "${name}" a été créé avec succès.`,
-    });
-    
-    // Réinitialiser le formulaire
-    setName('');
-    setDescription('');
-    setWords('');
+    // Process the words (split by line, trim, remove duplicates)
+    const wordList = words
+      .split('\n')
+      .map(word => word.trim())
+      .filter(word => word.length > 0)
+      .filter((word, index, self) => self.indexOf(word) === index);
+
+    // In a real app, we would save this to a backend or localStorage
+    // For now, we'll just simulate saving
+    setTimeout(() => {
+      toast({
+        title: "Dictionnaire créé",
+        description: `Le dictionnaire "${name}" a été créé avec succès avec ${wordList.length} mots.`,
+      });
+      
+      // Navigate to dictionaries page after successful creation
+      navigate('/dictionnaires');
+      
+      setIsSubmitting(false);
+    }, 1000);
+  };
+
+  // Function to generate a slug from the dictionary name
+  const generateSlug = (str: string) => {
+    return str
+      .toLowerCase()
+      .normalize('NFD') // Normalize accented characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with dash
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
   };
 
   return (
@@ -88,6 +114,10 @@ const CreerDictionnaire = () => {
                 <Layers size={16} />
                 <span>Développement</span>
               </a>
+              <a href="/dictionnaire/biere" className="block text-sm spotify-nav-item">
+                <Layers size={16} />
+                <span>Bière</span>
+              </a>
               <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item font-bold text-spotify">
                 <ArrowDownCircle size={16} />
                 <span>Créer un dictionnaire</span>
@@ -110,6 +140,11 @@ const CreerDictionnaire = () => {
                     onChange={e => setName(e.target.value)} 
                     placeholder="Ex: Science Fiction"
                   />
+                  {name && (
+                    <p className="text-xs text-muted-foreground">
+                      Identifiant: {generateSlug(name)}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -131,14 +166,20 @@ const CreerDictionnaire = () => {
                     placeholder="Entrez vos mots, un par ligne..."
                     className="min-h-32"
                   />
+                  {words && (
+                    <p className="text-xs text-muted-foreground">
+                      {words.split('\n').filter(w => w.trim().length > 0).length} mot(s)
+                    </p>
+                  )}
                 </div>
                 
                 <Button 
                   type="submit" 
                   className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
+                  disabled={isSubmitting}
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  Enregistrer le dictionnaire
+                  {isSubmitting ? 'Création en cours...' : 'Enregistrer le dictionnaire'}
                 </Button>
               </form>
             </Card>

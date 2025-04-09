@@ -1,27 +1,32 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { getAllDictionaries } from "@/utils/dictionaryUtils";
 
 const Dictionnaires = () => {
   const navigate = useNavigate();
+  const [dictionnaires, setDictionnaires] = useState<{ id: string; label: string; count: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const dictionnaires = [
-    { id: 'latin', label: 'Latin', count: 200 },
-    { id: 'viande', label: 'Viande', count: 120 },
-    { id: 'jeu', label: 'Jeu', count: 180 },
-    { id: 'biere', label: 'Bière', count: 90 },
-    { id: 'hipster', label: 'Hipster', count: 150 },
-    { id: 'developpement', label: 'Développement', count: 220 },
-    { id: 'it', label: 'IT', count: 180 },
-    { id: 'cuisine', label: 'Cuisine', count: 130 },
-    { id: 'fantasy', label: 'Fantasy', count: 170 },
-    { id: 'cyberpunk', label: 'Cyberpunk', count: 140 },
-    { id: 'philosophie', label: 'Philosophie', count: 110 }
-  ];
+  useEffect(() => {
+    const loadDictionaries = async () => {
+      setIsLoading(true);
+      try {
+        const dicts = await getAllDictionaries();
+        setDictionnaires(dicts);
+      } catch (error) {
+        console.error("Error loading dictionaries:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadDictionaries();
+  }, []);
 
   return (
     <div className="spotify-container">
@@ -64,6 +69,10 @@ const Dictionnaires = () => {
                 <Layers size={16} />
                 <span>Développement</span>
               </a>
+              <a href="/dictionnaire/biere" className="block text-sm spotify-nav-item">
+                <Layers size={16} />
+                <span>Bière</span>
+              </a>
               <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item">
                 <ArrowDownCircle size={16} />
                 <span>Créer un dictionnaire</span>
@@ -85,18 +94,22 @@ const Dictionnaires = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {dictionnaires.map((dict) => (
-                <Card 
-                  key={dict.id} 
-                  className="p-4 hover:bg-accent/10 transition-all cursor-pointer"
-                  onClick={() => navigate(`/dictionnaire/${dict.id}`)}
-                >
-                  <h3 className="font-bold mb-2">{dict.label}</h3>
-                  <p className="text-sm text-muted-foreground">{dict.count} mots</p>
-                </Card>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="py-10 text-center text-muted-foreground">Chargement des dictionnaires...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {dictionnaires.map((dict) => (
+                  <Card 
+                    key={dict.id} 
+                    className="p-4 hover:bg-accent/10 transition-all cursor-pointer"
+                    onClick={() => navigate(`/dictionnaire/${dict.id}`)}
+                  >
+                    <h3 className="font-bold mb-2">{dict.label}</h3>
+                    <p className="text-sm text-muted-foreground">{dict.count} mots</p>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>

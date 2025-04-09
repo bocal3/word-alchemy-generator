@@ -1,48 +1,128 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle, Play, Download } from "lucide-react";
+import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle, Play, Download, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { loadDictionary, saveDictionary } from "@/utils/dictionaryUtils";
 
 const DictionnaireDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [newWord, setNewWord] = useState("");
+  const [dictionary, setDictionary] = React.useState<{ title: string, description: string, words: string[] }>({
+    title: '',
+    description: '',
+    words: []
+  });
   
-  // Cette fonction simulerait la récupération des données du dictionnaire sélectionné
-  const getDictionaryData = (dictionaryId: string) => {
-    const dictionaries: Record<string, { title: string, description: string, words: string[] }> = {
-      latin: {
-        title: 'Latin',
-        description: 'Dictionnaire latin classique utilisé en typographie depuis les années 1500.',
-        words: ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit']
-      },
-      developpement: {
-        title: 'Développement',
-        description: 'Termes liés au développement logiciel et à la programmation.',
-        words: ['Code', 'API', 'Framework', 'Debug', 'Backend', 'Frontend', 'Database', 'Deploy']
-      },
-      fantasy: {
-        title: 'Fantasy',
-        description: 'Vocabulaire issu des univers de fantasy médiévale.',
-        words: ['Dragon', 'Magie', 'Épée', 'Royaume', 'Sorcier', 'Créature', 'Elfe', 'Nain']
-      },
-      cyberpunk: {
-        title: 'Cyberpunk',
-        description: 'Vocabulaire issu des univers de science-fiction cyberpunk.',
-        words: ['Cyberespace', 'Implant', 'Réalité', 'Virtuel', 'Hacker', 'Néon', 'Mégacorpo', 'IA']
-      },
-    };
-    
-    return dictionaries[dictionaryId] || {
-      title: id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Inconnu',
-      description: 'Aucune description disponible pour ce dictionnaire.',
-      words: ['Mot1', 'Mot2', 'Mot3', 'Mot4', 'Mot5']
-    };
+  React.useEffect(() => {
+    // Load dictionary data when the component mounts or id changes
+    if (id) {
+      // Try to load the actual dictionary file
+      loadDictionary(id)
+        .then(data => {
+          if (data && data.words) {
+            setDictionary({
+              title: id.charAt(0).toUpperCase() + id.slice(1),
+              description: `Dictionnaire de mots liés à "${id}"`,
+              words: data.words
+            });
+          } else {
+            // Fallback to static data if dictionary file couldn't be loaded
+            const dictionaries: Record<string, { title: string, description: string, words: string[] }> = {
+              latin: {
+                title: 'Latin',
+                description: 'Dictionnaire latin classique utilisé en typographie depuis les années 1500.',
+                words: ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit']
+              },
+              developpement: {
+                title: 'Développement',
+                description: 'Termes liés au développement logiciel et à la programmation.',
+                words: ['Code', 'API', 'Framework', 'Debug', 'Backend', 'Frontend', 'Database', 'Deploy']
+              },
+              fantasy: {
+                title: 'Fantasy',
+                description: 'Vocabulaire issu des univers de fantasy médiévale.',
+                words: ['Dragon', 'Magie', 'Épée', 'Royaume', 'Sorcier', 'Créature', 'Elfe', 'Nain']
+              },
+              cyberpunk: {
+                title: 'Cyberpunk',
+                description: 'Vocabulaire issu des univers de science-fiction cyberpunk.',
+                words: ['Cyberespace', 'Implant', 'Réalité', 'Virtuel', 'Hacker', 'Néon', 'Mégacorpo', 'IA']
+              },
+            };
+            
+            setDictionary(dictionaries[id] || {
+              title: id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Inconnu',
+              description: 'Aucune description disponible pour ce dictionnaire.',
+              words: ['Mot1', 'Mot2', 'Mot3', 'Mot4', 'Mot5']
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Erreur lors du chargement du dictionnaire:", error);
+          toast({
+            title: "Erreur",
+            description: "Impossible de charger le dictionnaire",
+            variant: "destructive"
+          });
+        });
+    }
+  }, [id, toast]);
+
+  const handleAddWord = () => {
+    if (!newWord.trim()) {
+      toast({
+        title: "Mot vide",
+        description: "Veuillez entrer un mot valide",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (dictionary.words.includes(newWord.trim())) {
+      toast({
+        title: "Mot existant",
+        description: "Ce mot existe déjà dans le dictionnaire",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const updatedWords = [...dictionary.words, newWord.trim()];
+    setDictionary({
+      ...dictionary,
+      words: updatedWords
+    });
+
+    // Try to save the dictionary if it's a valid ID
+    if (id) {
+      saveDictionary(id, { words: updatedWords })
+        .then(() => {
+          toast({
+            title: "Mot ajouté",
+            description: `"${newWord.trim()}" a été ajouté au dictionnaire`,
+          });
+        })
+        .catch(() => {
+          toast({
+            description: `"${newWord.trim()}" a été ajouté temporairement (sauvegarde impossible)`,
+          });
+        });
+    }
+
+    setNewWord("");
   };
-  
-  const dictionary = getDictionaryData(id || '');
+
+  const handleGenerateText = () => {
+    navigate('/', { state: { selectedDictionary: id } });
+  };
 
   return (
     <div className="spotify-container">
@@ -91,6 +171,13 @@ const DictionnaireDetail = () => {
                 <Layers size={16} />
                 <span>Développement</span>
               </a>
+              <a 
+                href="/dictionnaire/biere" 
+                className={`block text-sm spotify-nav-item ${id === 'biere' ? 'font-bold text-spotify' : ''}`}
+              >
+                <Layers size={16} />
+                <span>Bière</span>
+              </a>
               <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item">
                 <ArrowDownCircle size={16} />
                 <span>Créer un dictionnaire</span>
@@ -109,11 +196,12 @@ const DictionnaireDetail = () => {
                 <Badge className="mb-2">Dictionnaire</Badge>
                 <h1 className="text-4xl font-bold mb-2 text-spotify">{dictionary.title}</h1>
                 <p className="text-muted-foreground">{dictionary.description}</p>
+                <p className="text-muted-foreground mt-1">{dictionary.words.length} mots</p>
               </div>
             </div>
             
             <div className="flex gap-4 mb-8">
-              <Button className="bg-spotify hover:bg-spotify/90 text-spotify-foreground rounded-full">
+              <Button className="bg-spotify hover:bg-spotify/90 text-spotify-foreground rounded-full" onClick={handleGenerateText}>
                 <Play className="mr-2 h-4 w-4" />
                 Générer du texte
               </Button>
@@ -123,11 +211,28 @@ const DictionnaireDetail = () => {
               </Button>
             </div>
             
-            <h2 className="text-xl font-bold mb-4">Mots du dictionnaire</h2>
+            <div className="mb-8">
+              <h2 className="text-xl font-bold mb-4">Ajouter un mot</h2>
+              <div className="flex gap-2">
+                <Input 
+                  value={newWord}
+                  onChange={(e) => setNewWord(e.target.value)}
+                  placeholder="Nouveau mot..."
+                  className="flex-1"
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddWord()}
+                />
+                <Button onClick={handleAddWord} className="bg-spotify hover:bg-spotify/90 text-spotify-foreground">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Ajouter
+                </Button>
+              </div>
+            </div>
+            
+            <h2 className="text-xl font-bold mb-4">Mots du dictionnaire ({dictionary.words.length})</h2>
             <Card className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {dictionary.words.map((word, index) => (
-                  <div key={index} className="p-2 border rounded-md text-center">
+                  <div key={index} className="p-2 border rounded-md text-center hover:bg-accent/10 transition-colors">
                     {word}
                   </div>
                 ))}

@@ -10,7 +10,7 @@ interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({ 
   className, 
-  src = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=200&h=200", 
+  src = "/img/logo.png", 
   alt = "Psum Logo" 
 }) => {
   return (

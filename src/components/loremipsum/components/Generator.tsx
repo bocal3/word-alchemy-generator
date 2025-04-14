@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLoremGenerator } from '../utils/generateLorem';
 import { Card } from '@/components/ui/card';
@@ -11,6 +10,11 @@ import DictionarySelector from './DictionarySelector';
 import GeneratorOptions from './GeneratorOptions';
 import AdvancedOptions from './AdvancedOptions';
 import GeneratedContent from './GeneratedContent';
+
+interface GeneratorProps {
+  initialDictionary?: string;
+  availableDictionaries?: string[];
+}
 
 const dictionaries = [
   { id: 'latin', label: 'Latin' },
@@ -34,7 +38,7 @@ const dictionaries = [
   { id: 'philosophie', label: 'Philosophie' }
 ];
 
-const Generator: React.FC = () => {
+const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDictionaries }) => {
   const { toast } = useToast();
   const { generate, isGenerating, generatedText } = useLoremGenerator();
   
@@ -156,7 +160,7 @@ const Generator: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-spotify">
-          Générateur de Lorem Ipsum Thématique
+          Générateur Psum
         </h1>
         <p className="text-muted-foreground mt-2">
           Générez du texte de remplissage thématique pour vos projets

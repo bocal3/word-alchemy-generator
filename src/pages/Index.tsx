@@ -51,7 +51,7 @@ const Index = () => {
       <div className="spotify-main">
         <aside className="spotify-sidebar">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Lorem Ipsum</h2>
+            <h2 className="text-xl font-bold">Psum</h2>
             <ThemeToggle />
           </div>
           
@@ -97,7 +97,7 @@ const Index = () => {
         
         <main className="spotify-content">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 text-spotify">Générateur Lorem Ipsum</h1>
+            <h1 className="text-3xl font-bold mb-6 text-spotify">Générateur Psum</h1>
             <div className="animate-fade-in">
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">Chargement des dictionnaires...</div>

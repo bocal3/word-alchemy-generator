@@ -5,6 +5,7 @@ import { Home, Library } from "lucide-react";
 import { LoremGenerator } from "@/components/loremipsum";
 import { useLocation } from "react-router-dom";
 import { discoverDictionaries } from "@/utils/dictionaryUtils";
+import { Logo } from "@/components/ui/logo";
 
 const Index = () => {
   const location = useLocation();
@@ -33,7 +34,7 @@ const Index = () => {
       <div className="psum-main">
         <aside className="psum-sidebar">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-spotify">Psum</h2>
+            <Logo />
             <ThemeToggle />
           </div>
           

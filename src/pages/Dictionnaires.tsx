@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { getAllDictionaries } from "@/utils/dictionaryUtils";
+import { Logo } from "@/components/ui/logo";
 
 const Dictionnaires = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Dictionnaires = () => {
       <div className="psum-main">
         <aside className="psum-sidebar">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-spotify">Psum</h2>
+            <Logo />
             <ThemeToggle />
           </div>
           

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLoremGenerator } from '../utils/generateLorem';
+import React, { useState, useEffect } from 'react';
+import { useLoremGenerator, discoverDictionaries } from '../utils/generateLorem';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,54 +16,16 @@ interface GeneratorProps {
   availableDictionaries?: string[];
 }
 
-const dictionaries = [
-  { id: 'latin', label: 'Latin' },
-  { id: 'viande', label: 'Viande' },
-  { id: 'jeu', label: 'Jeu' },
-  { id: 'biere', label: 'Bière' },
-  { id: 'hipster', label: 'Hipster' },
-  { id: 'survie', label: 'Survie' },
-  { id: 'randonnee', label: 'Randonnée' },
-  { id: 'outils', label: 'Outils' },
-  { id: 'developpement', label: 'Développement' },
-  { id: 'it', label: 'IT' },
-  { id: 'police', label: 'Police' },
-  { id: 'cuisine', label: 'Cuisine' },
-  { id: 'photo', label: 'Photo' },
-  { id: 'paranormal', label: 'Paranormal' },
-  { id: 'startup', label: 'Startup' },
-  { id: 'fantasy', label: 'Fantasy' },
-  { id: 'cyberpunk', label: 'Cyberpunk' },
-  { id: 'telerealite', label: 'Télé-réalité' },
-  { id: 'philosophie', label: 'Philosophie' }
-];
-
-const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDictionaries }) => {
+const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDictionaries = [] }) => {
   const { toast } = useToast();
   const { generate, isGenerating, generatedText } = useLoremGenerator();
   
+  // State for available dictionaries
+  const [dictionaryList, setDictionaryList] = useState<{ id: string; label: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
   // State for dictionaries
-  const [selectedDictionaries, setSelectedDictionaries] = useState<Record<string, boolean>>({
-    latin: true,
-    viande: false,
-    jeu: false,
-    biere: false,
-    hipster: false,
-    survie: false,
-    randonnee: false,
-    outils: false,
-    developpement: false,
-    it: false,
-    police: false,
-    cuisine: false,
-    photo: false,
-    paranormal: false,
-    startup: false,
-    fantasy: false,
-    cyberpunk: false,
-    telerealite: false,
-    philosophie: false
-  });
+  const [selectedDictionaries, setSelectedDictionaries] = useState<Record<string, boolean>>({});
   const [areAllSelected, setAreAllSelected] = useState(false);
   
   // State for generator options
@@ -82,6 +44,53 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
     max: 7
   });
   
+  // Load available dictionaries
+  useEffect(() => {
+    const loadAvailableDictionaries = async () => {
+      setIsLoading(true);
+      try {
+        // Use provided dictionaries or discover them
+        const dictionaries = availableDictionaries.length > 0 
+          ? availableDictionaries 
+          : await discoverDictionaries();
+        
+        // Format dictionary list
+        const formattedList = dictionaries.map(id => ({
+          id,
+          label: id.charAt(0).toUpperCase() + id.slice(1)
+        }));
+        
+        setDictionaryList(formattedList);
+        
+        // Initialize selected dictionaries
+        const initialSelected: Record<string, boolean> = {};
+        formattedList.forEach(dict => {
+          // If initialDictionary is provided, only select that one
+          if (initialDictionary) {
+            initialSelected[dict.id] = dict.id === initialDictionary;
+          } else {
+            // Default to Latin selected
+            initialSelected[dict.id] = dict.id === 'latin';
+          }
+        });
+        
+        setSelectedDictionaries(initialSelected);
+      } catch (error) {
+        console.error('Error loading dictionaries:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadAvailableDictionaries();
+  }, [initialDictionary, availableDictionaries]);
+  
+  // Check if all dictionaries are selected
+  useEffect(() => {
+    const allSelected = dictionaryList.every(dict => selectedDictionaries[dict.id]);
+    setAreAllSelected(allSelected);
+  }, [selectedDictionaries, dictionaryList]);
+  
   // Event handlers
   const handleCheckboxChange = (id: string) => {
     setSelectedDictionaries(prev => {
@@ -90,20 +99,15 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
         [id]: !prev[id]
       };
       
-      // Check if all dictionaries are now selected
-      const allSelected = dictionaries.every(dict => updated[dict.id]);
-      setAreAllSelected(allSelected);
-      
       return updated;
     });
   };
   
   const handleSelectAll = () => {
     const newValue = !areAllSelected;
-    setAreAllSelected(newValue);
     
     const newSelectedDictionaries: Record<string, boolean> = {};
-    dictionaries.forEach(dict => {
+    dictionaryList.forEach(dict => {
       newSelectedDictionaries[dict.id] = newValue;
     });
     
@@ -156,6 +160,18 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
     setGenerateSingleSentence(prev => !prev);
   };
 
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-4">
+        <Card className="p-6">
+          <div className="py-10 text-center text-muted-foreground">
+            Chargement des dictionnaires...
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="mb-8 text-center">
@@ -171,7 +187,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
         <div className="space-y-6">
           {/* Dictionary selection component */}
           <DictionarySelector
-            dictionaries={dictionaries}
+            dictionaries={dictionaryList}
             selectedDictionaries={selectedDictionaries}
             areAllSelected={areAllSelected}
             onDictionaryChange={handleCheckboxChange}

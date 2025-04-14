@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export interface Dictionary {
@@ -22,24 +21,41 @@ export interface GenerateLoremParams {
 // Function to load dictionary data
 const loadDictionary = async (name: string): Promise<Dictionary> => {
   try {
-    // Check localStorage first for custom dictionaries
-    const localWords = localStorage.getItem(`dictionary_${name}`);
-    if (localWords) {
-      try {
-        const parsedWords = JSON.parse(localWords);
-        return { words: parsedWords };
-      } catch (e) {
-        console.error('Error parsing localStorage dictionary:', e);
-      }
-    }
-    
-    // Try dynamic import of dictionary files
+    // Try to load from JSON file first
     try {
       const module = await import(`../data/${name}.json`);
-      return module as Dictionary;
+      const fileDict = module as Dictionary;
+      
+      // Check if we have additional words in localStorage
+      const localWords = localStorage.getItem(`dictionary_${name}`);
+      if (localWords) {
+        try {
+          const parsedLocalWords = JSON.parse(localWords);
+          return { 
+            words: [...fileDict.words, ...parsedLocalWords] 
+          };
+        } catch (e) {
+          console.error('Error parsing localStorage dictionary:', e);
+          return fileDict;
+        }
+      }
+      
+      return fileDict;
     } catch (importError) {
-      console.error(`No dictionary file found for ${name}, using localStorage only`);
-      return { words: [] }; 
+      // If the file doesn't exist, check localStorage
+      const localWords = localStorage.getItem(`dictionary_${name}`);
+      if (localWords) {
+        try {
+          const parsedWords = JSON.parse(localWords);
+          return { words: parsedWords };
+        } catch (e) {
+          console.error('Error parsing localStorage dictionary:', e);
+          return { words: [] };
+        }
+      }
+      
+      // No file and no localStorage data
+      return { words: [] };
     }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);
@@ -142,12 +158,10 @@ export const generateLorem = async ({
 };
 
 /**
- * Découvre dynamiquement les dictionnaires disponibles dans le dossier data
- * @returns Un tableau contenant les noms des dictionnaires disponibles
+ * Découvre dynamiquement les dictionnaires disponibles
  */
 export const discoverDictionaries = async (): Promise<string[]> => {
-  // This is a fixed list based on the project structure
-  const baseDictionaries = [
+  const coreDictionaries = [
     'latin',
     'viande',
     'jeu',
@@ -169,23 +183,20 @@ export const discoverDictionaries = async (): Promise<string[]> => {
     'philosophie'
   ];
   
-  // Get custom dictionaries from localStorage
-  const customDictsString = localStorage.getItem('custom_dictionaries');
-  let customDicts: string[] = [];
+  // Get created dictionaries from localStorage
+  const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
+  let createdDictionaries: string[] = [];
   
-  if (customDictsString) {
+  if (createdDictionariesJSON) {
     try {
-      const parsed = JSON.parse(customDictsString);
-      if (Array.isArray(parsed)) {
-        customDicts = parsed;
-      }
+      createdDictionaries = JSON.parse(createdDictionariesJSON);
     } catch (e) {
-      console.error('Error parsing custom dictionaries:', e);
+      console.error('Error parsing created dictionaries:', e);
     }
   }
   
-  // Combine base and custom dictionaries
-  return [...baseDictionaries, ...customDicts];
+  // Combine core and created dictionaries
+  return [...coreDictionaries, ...createdDictionaries];
 };
 
 // Custom hook to use the generator

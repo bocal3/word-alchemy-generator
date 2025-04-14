@@ -16,14 +16,20 @@ export const loadDictionary = async (name: string): Promise<Dictionary | null> =
 // Function to save dictionary data
 export const saveDictionary = async (name: string, data: Partial<Dictionary>): Promise<boolean> => {
   try {
-    // In a real app, this would save to a backend or localStorage
-    // Since we can't write to files in the browser directly, we'll simulate saving
-    // and show a message to the user about the limitation
-    console.log(`Would save dictionary ${name}:`, data);
+    // In a browser environment, we can't directly write to files
+    // Here we'll use localStorage to simulate saving the dictionary
+    // In a real production app, this would call an API endpoint
     
-    // Let's save to localStorage for persistence within the session
+    // Store the dictionary in localStorage
     if (data.words) {
       localStorage.setItem(`dictionary_${name}`, JSON.stringify(data.words));
+      
+      // Add to list of created dictionaries if it's a new one
+      const createdDictionaries = JSON.parse(localStorage.getItem('created_dictionaries') || '[]');
+      if (!createdDictionaries.includes(name)) {
+        createdDictionaries.push(name);
+        localStorage.setItem('created_dictionaries', JSON.stringify(createdDictionaries));
+      }
     }
     
     return true;
@@ -50,16 +56,15 @@ export const getDictionaryWords = async (name: string): Promise<string[]> => {
     }
   }
   
-  // Combine and deduplicate words
-  const allWords = [...fileWords, ...parsedLocalWords];
-  return [...new Set(allWords)]; // Remove duplicates
+  // Return combined words
+  return [...fileWords, ...parsedLocalWords];
 };
 
-// Discover all dictionary files in the data directory
+// Discover all dictionary files
 export const discoverDictionaries = async (): Promise<string[]> => {
-  // This is a fixed list based on the structure of the project
-  // In a real app, this would be dynamically generated from the server
-  return [
+  // In a real app, we would scan the directory
+  // Here we'll use a predefined list of the core dictionaries
+  const coreDictionaries = [
     'latin',
     'viande',
     'jeu',
@@ -80,6 +85,21 @@ export const discoverDictionaries = async (): Promise<string[]> => {
     'telerealite',
     'philosophie'
   ];
+  
+  // Get created dictionaries from localStorage
+  const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
+  let createdDictionaries: string[] = [];
+  
+  if (createdDictionariesJSON) {
+    try {
+      createdDictionaries = JSON.parse(createdDictionariesJSON);
+    } catch (e) {
+      console.error('Error parsing created dictionaries:', e);
+    }
+  }
+  
+  // Combine core and created dictionaries
+  return [...coreDictionaries, ...createdDictionaries];
 };
 
 // Get all available dictionaries with metadata
@@ -117,27 +137,38 @@ export const createDictionary = async (name: string, words: string[]): Promise<b
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
     
-    // Store in localStorage
+    // In a real app, we would write to a file
+    // Here we'll use localStorage to simulate file creation
     localStorage.setItem(`dictionary_${slug}`, JSON.stringify(words));
     
-    // Also add to the list of custom dictionaries
-    const customDicts = localStorage.getItem('custom_dictionaries') || '[]';
-    let parsedCustomDicts: string[] = [];
-    
-    try {
-      parsedCustomDicts = JSON.parse(customDicts);
-    } catch (e) {
-      console.error('Error parsing custom dictionaries:', e);
-    }
-    
-    if (!parsedCustomDicts.includes(slug)) {
-      parsedCustomDicts.push(slug);
-      localStorage.setItem('custom_dictionaries', JSON.stringify(parsedCustomDicts));
+    // Add to list of created dictionaries
+    const createdDictionaries = JSON.parse(localStorage.getItem('created_dictionaries') || '[]');
+    if (!createdDictionaries.includes(slug)) {
+      createdDictionaries.push(slug);
+      localStorage.setItem('created_dictionaries', JSON.stringify(createdDictionaries));
     }
     
     return true;
   } catch (error) {
     console.error(`Error creating dictionary ${name}:`, error);
+    return false;
+  }
+};
+
+// Add words to an existing dictionary
+export const addWordsToDictionary = async (name: string, newWords: string[]): Promise<boolean> => {
+  try {
+    // Get existing words
+    const existingWords = await getDictionaryWords(name);
+    
+    // Combine and deduplicate
+    const combinedWords = [...existingWords, ...newWords];
+    const uniqueWords = [...new Set(combinedWords)];
+    
+    // Save back to storage
+    return await saveDictionary(name, { words: uniqueWords });
+  } catch (error) {
+    console.error(`Error adding words to dictionary ${name}:`, error);
     return false;
   }
 };

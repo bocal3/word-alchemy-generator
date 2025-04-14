@@ -18,24 +18,7 @@ const Index = () => {
       setIsLoading(true);
       try {
         const dicts = await discoverDictionaries();
-        
-        // Add custom dictionaries from localStorage
-        const customDictsString = localStorage.getItem('custom_dictionaries');
-        if (customDictsString) {
-          try {
-            const customDicts = JSON.parse(customDictsString);
-            if (Array.isArray(customDicts)) {
-              setDictionaries([...dicts, ...customDicts]);
-            } else {
-              setDictionaries(dicts);
-            }
-          } catch (e) {
-            console.error('Error parsing custom dictionaries:', e);
-            setDictionaries(dicts);
-          }
-        } else {
-          setDictionaries(dicts);
-        }
+        setDictionaries(dicts);
       } catch (error) {
         console.error("Error loading dictionaries:", error);
       } finally {

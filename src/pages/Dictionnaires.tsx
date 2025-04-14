@@ -33,7 +33,7 @@ const Dictionnaires = () => {
       <div className="spotify-main">
         <aside className="spotify-sidebar">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Lorem Ipsum</h2>
+            <h2 className="text-xl font-bold">Psum</h2>
             <ThemeToggle />
           </div>
           

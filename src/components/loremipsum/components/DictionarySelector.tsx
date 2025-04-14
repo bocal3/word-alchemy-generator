@@ -43,7 +43,7 @@ const DictionarySelector: React.FC<DictionarySelectorProps> = ({
           <div key={dict.id} className="flex items-center space-x-2">
             <Checkbox 
               id={`checkbox-${dict.id}`} 
-              checked={selectedDictionaries[dict.id]} 
+              checked={selectedDictionaries[dict.id] || false} 
               onCheckedChange={() => onDictionaryChange(dict.id)}
             />
             <Label htmlFor={`checkbox-${dict.id}`} className="text-sm">

@@ -1,9 +1,8 @@
 
 import React, { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle } from "lucide-react";
+import { Home, Library } from "lucide-react";
 import { LoremGenerator } from "@/components/loremipsum";
-import { Button } from "@/components/ui/button";
 import { useLocation } from "react-router-dom";
 import { discoverDictionaries } from "@/utils/dictionaryUtils";
 
@@ -30,58 +29,34 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="spotify-container">
-      <div className="spotify-main">
-        <aside className="spotify-sidebar">
+    <div className="psum-container">
+      <div className="psum-main">
+        <aside className="psum-sidebar">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Psum</h2>
+            <h2 className="text-xl font-bold text-spotify">Psum</h2>
             <ThemeToggle />
           </div>
           
           <nav className="space-y-1">
-            <a href="/" className="spotify-nav-item font-bold text-spotify">
+            <a href="/" className="psum-nav-item-active">
               <Home size={20} />
               <span>Accueil</span>
             </a>
-            <a href="/dictionnaires" className="spotify-nav-item">
+            <a href="/dictionnaires" className="psum-nav-item">
               <Library size={20} />
               <span>Dictionnaires</span>
             </a>
           </nav>
           
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-sidebar-foreground">DICTIONNAIRES</h3>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <PlusCircle size={16} />
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <a href="/dictionnaire/latin" className="block text-sm spotify-nav-item">
-                <Music size={16} />
-                <span>Latin</span>
-              </a>
-              <a href="/dictionnaire/developpement" className="block text-sm spotify-nav-item">
-                <Layers size={16} />
-                <span>Développement</span>
-              </a>
-              <a href="/dictionnaire/biere" className="block text-sm spotify-nav-item">
-                <Layers size={16} />
-                <span>Bière</span>
-              </a>
-              <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item">
-                <ArrowDownCircle size={16} />
-                <span>Créer un dictionnaire</span>
-              </a>
-            </div>
+          <div className="mt-auto pt-6 border-t border-sidebar-border">
+            <p className="text-xs text-sidebar-foreground/60">© 2025 Psum - Générateur de texte</p>
           </div>
         </aside>
         
-        <main className="spotify-content">
+        <main className="psum-content">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold mb-6 text-spotify">Générateur Psum</h1>
-            <div className="animate-fade-in">
+            <div className="animate-fade-in rounded-xl overflow-hidden bg-card p-6 shadow-sm border border-border">
               {isLoading ? (
                 <div className="py-10 text-center text-muted-foreground">Chargement des dictionnaires...</div>
               ) : (

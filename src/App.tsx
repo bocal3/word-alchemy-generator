@@ -14,8 +14,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 const queryClient = new QueryClient();
 
+// Update title
+document.title = "Psum - Générateur de texte";
+
 const App = () => (
-  <ThemeProvider defaultTheme="dark">
+  <ThemeProvider defaultTheme="light">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -27,7 +30,6 @@ const App = () => (
             <Route path="/dictionnaires" element={<Dictionnaires />} />
             <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
             <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 214 100% 50%;
+    --primary: 222 47% 50%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -23,42 +23,42 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 214 100% 50%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 222 47% 95%;
+    --accent-foreground: 222 47% 40%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 214 100% 50%;
+    --ring: 222 47% 50%;
 
     --radius: 0.5rem;
 
-    --spotify: 214 100% 50%;
+    --spotify: 222 47% 50%;
     --spotify-foreground: 0 0% 98%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 214 100% 50%;
+    --sidebar-primary: 222 47% 50%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent: 222 47% 95%;
+    --sidebar-accent-foreground: 222 47% 40%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 214 100% 50%;
+    --sidebar-ring: 222 47% 50%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 240 10% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 240 10% 12%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 214 100% 50%;
+    --primary: 222 47% 60%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
@@ -67,27 +67,27 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 214 100% 50%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 222 47% 18%;
+    --accent-foreground: 222 47% 70%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 214 100% 50%;
+    --ring: 222 47% 60%;
 
-    --spotify: 214 100% 50%;
+    --spotify: 222 47% 60%;
     --spotify-foreground: 0 0% 98%;
 
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 240 10% 12%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 214 100% 50%;
+    --sidebar-primary: 222 47% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 222 47% 70%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 214 100% 50%;
+    --sidebar-ring: 222 47% 60%;
   }
 }
 
@@ -101,37 +101,41 @@
   }
 }
 
-/* Spotify-inspired styles */
+/* Psum-inspired styles */
 @layer components {
-  .spotify-container {
+  .psum-container {
     @apply h-screen flex flex-col bg-background;
   }
   
-  .spotify-main {
+  .psum-main {
     @apply flex flex-1 overflow-hidden;
   }
   
-  .spotify-sidebar {
-    @apply w-64 bg-sidebar p-4 flex flex-col gap-6 border-r border-sidebar-border;
+  .psum-sidebar {
+    @apply w-64 bg-sidebar p-4 flex flex-col gap-4 border-r border-sidebar-border;
   }
   
-  .spotify-content {
+  .psum-content {
     @apply flex-1 overflow-auto p-6;
   }
   
-  .spotify-card {
-    @apply bg-card hover:bg-accent/10 transition-all duration-200 rounded-md p-4;
+  .psum-card {
+    @apply bg-card hover:bg-accent/50 transition-all duration-200 rounded-md p-4 shadow-sm;
   }
   
-  .spotify-button {
+  .psum-button {
     @apply bg-spotify text-spotify-foreground hover:bg-spotify/90 rounded-full font-medium px-6 py-2;
   }
   
-  .spotify-nav-item {
-    @apply flex items-center gap-3 text-sidebar-foreground hover:text-spotify py-2 transition-colors;
+  .psum-nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-primary transition-colors;
   }
   
-  .spotify-player {
+  .psum-nav-item-active {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-md bg-sidebar-accent text-sidebar-primary font-medium transition-colors;
+  }
+  
+  .psum-player {
     @apply border-t border-border bg-card p-4;
   }
 }

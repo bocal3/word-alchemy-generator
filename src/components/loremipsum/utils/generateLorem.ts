@@ -22,9 +22,25 @@ export interface GenerateLoremParams {
 // Function to load dictionary data
 const loadDictionary = async (name: string): Promise<Dictionary> => {
   try {
-    // Dynamic import of dictionary files
-    const module = await import(`../data/${name}.json`);
-    return module as Dictionary;
+    // Check localStorage first for custom dictionaries
+    const localWords = localStorage.getItem(`dictionary_${name}`);
+    if (localWords) {
+      try {
+        const parsedWords = JSON.parse(localWords);
+        return { words: parsedWords };
+      } catch (e) {
+        console.error('Error parsing localStorage dictionary:', e);
+      }
+    }
+    
+    // Try dynamic import of dictionary files
+    try {
+      const module = await import(`../data/${name}.json`);
+      return module as Dictionary;
+    } catch (importError) {
+      console.error(`No dictionary file found for ${name}, using localStorage only`);
+      return { words: [] }; 
+    }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);
     return { words: [] };
@@ -130,13 +146,8 @@ export const generateLorem = async ({
  * @returns Un tableau contenant les noms des dictionnaires disponibles
  */
 export const discoverDictionaries = async (): Promise<string[]> => {
-  // Cette fonction est un placeholder. Dans un environnement réel avec Node.js,
-  // nous pourrions utiliser le système de fichiers pour scanner le dossier data.
-  // Avec Vite/React, nous devons lister manuellement les dictionnaires.
-  // Mais cette fonction pourrait être étendue pour charger des dictionnaires 
-  // depuis une API ou un autre point d'entrée.
-  
-  return [
+  // This is a fixed list based on the project structure
+  const baseDictionaries = [
     'latin',
     'viande',
     'jeu',
@@ -156,9 +167,25 @@ export const discoverDictionaries = async (): Promise<string[]> => {
     'cyberpunk',
     'telerealite',
     'philosophie'
-    // Pour ajouter un nouveau dictionnaire, ajoutez simplement son nom ici
-    // et créez un fichier JSON correspondant dans le dossier data
   ];
+  
+  // Get custom dictionaries from localStorage
+  const customDictsString = localStorage.getItem('custom_dictionaries');
+  let customDicts: string[] = [];
+  
+  if (customDictsString) {
+    try {
+      const parsed = JSON.parse(customDictsString);
+      if (Array.isArray(parsed)) {
+        customDicts = parsed;
+      }
+    } catch (e) {
+      console.error('Error parsing custom dictionaries:', e);
+    }
+  }
+  
+  // Combine base and custom dictionaries
+  return [...baseDictionaries, ...customDicts];
 };
 
 // Custom hook to use the generator

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle, Save } from "lucide-react";
+import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { createDictionary } from "@/utils/dictionaryUtils";
 
 const CreerDictionnaire = () => {
   const { toast } = useToast();
@@ -18,7 +19,7 @@ const CreerDictionnaire = () => {
   const [words, setWords] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -48,19 +49,30 @@ const CreerDictionnaire = () => {
       .filter(word => word.length > 0)
       .filter((word, index, self) => self.indexOf(word) === index);
 
-    // In a real app, we would save this to a backend or localStorage
-    // For now, we'll just simulate saving
-    setTimeout(() => {
+    try {
+      // Create the dictionary
+      const success = await createDictionary(name, wordList);
+      
+      if (success) {
+        toast({
+          title: "Dictionnaire créé",
+          description: `Le dictionnaire "${name}" a été créé avec succès avec ${wordList.length} mots.`,
+        });
+        
+        // Navigate to dictionaries page after successful creation
+        navigate('/dictionnaires');
+      } else {
+        throw new Error("Échec de la création du dictionnaire");
+      }
+    } catch (error) {
       toast({
-        title: "Dictionnaire créé",
-        description: `Le dictionnaire "${name}" a été créé avec succès avec ${wordList.length} mots.`,
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création du dictionnaire.",
+        variant: "destructive"
       });
-      
-      // Navigate to dictionaries page after successful creation
-      navigate('/dictionnaires');
-      
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   // Function to generate a slug from the dictionary name
@@ -86,10 +98,6 @@ const CreerDictionnaire = () => {
             <a href="/" className="spotify-nav-item">
               <Home size={20} />
               <span>Accueil</span>
-            </a>
-            <a href="/recherche" className="spotify-nav-item">
-              <Search size={20} />
-              <span>Rechercher</span>
             </a>
             <a href="/dictionnaires" className="spotify-nav-item">
               <Library size={20} />

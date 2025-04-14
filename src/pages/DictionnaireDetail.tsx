@@ -1,79 +1,50 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle, Play, Download, Plus } from "lucide-react";
+import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle, Play, Download, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { loadDictionary, saveDictionary } from "@/utils/dictionaryUtils";
+import { loadDictionary, saveDictionary, getDictionaryWords } from "@/utils/dictionaryUtils";
 
 const DictionnaireDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [newWord, setNewWord] = useState("");
-  const [dictionary, setDictionary] = React.useState<{ title: string, description: string, words: string[] }>({
+  const [dictionary, setDictionary] = useState<{ title: string, description: string, words: string[] }>({
     title: '',
     description: '',
     words: []
   });
   
-  React.useEffect(() => {
-    // Load dictionary data when the component mounts or id changes
-    if (id) {
-      // Try to load the actual dictionary file
-      loadDictionary(id)
-        .then(data => {
-          if (data && data.words) {
-            setDictionary({
-              title: id.charAt(0).toUpperCase() + id.slice(1),
-              description: `Dictionnaire de mots liés à "${id}"`,
-              words: data.words
-            });
-          } else {
-            // Fallback to static data if dictionary file couldn't be loaded
-            const dictionaries: Record<string, { title: string, description: string, words: string[] }> = {
-              latin: {
-                title: 'Latin',
-                description: 'Dictionnaire latin classique utilisé en typographie depuis les années 1500.',
-                words: ['Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit']
-              },
-              developpement: {
-                title: 'Développement',
-                description: 'Termes liés au développement logiciel et à la programmation.',
-                words: ['Code', 'API', 'Framework', 'Debug', 'Backend', 'Frontend', 'Database', 'Deploy']
-              },
-              fantasy: {
-                title: 'Fantasy',
-                description: 'Vocabulaire issu des univers de fantasy médiévale.',
-                words: ['Dragon', 'Magie', 'Épée', 'Royaume', 'Sorcier', 'Créature', 'Elfe', 'Nain']
-              },
-              cyberpunk: {
-                title: 'Cyberpunk',
-                description: 'Vocabulaire issu des univers de science-fiction cyberpunk.',
-                words: ['Cyberespace', 'Implant', 'Réalité', 'Virtuel', 'Hacker', 'Néon', 'Mégacorpo', 'IA']
-              },
-            };
-            
-            setDictionary(dictionaries[id] || {
-              title: id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Inconnu',
-              description: 'Aucune description disponible pour ce dictionnaire.',
-              words: ['Mot1', 'Mot2', 'Mot3', 'Mot4', 'Mot5']
-            });
-          }
-        })
-        .catch(error => {
-          console.error("Erreur lors du chargement du dictionnaire:", error);
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger le dictionnaire",
-            variant: "destructive"
-          });
+  useEffect(() => {
+    const loadDictionaryData = async () => {
+      if (!id) return;
+      
+      try {
+        // Get combined words from file and localStorage
+        const words = await getDictionaryWords(id);
+        
+        setDictionary({
+          title: id.charAt(0).toUpperCase() + id.slice(1),
+          description: `Dictionnaire de mots liés à "${id}"`,
+          words
         });
-    }
+      } catch (error) {
+        console.error("Erreur lors du chargement du dictionnaire:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger le dictionnaire",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    loadDictionaryData();
   }, [id, toast]);
 
   const handleAddWord = () => {
@@ -101,7 +72,7 @@ const DictionnaireDetail = () => {
       words: updatedWords
     });
 
-    // Try to save the dictionary if it's a valid ID
+    // Save the updated dictionary
     if (id) {
       saveDictionary(id, { words: updatedWords })
         .then(() => {
@@ -137,10 +108,6 @@ const DictionnaireDetail = () => {
             <a href="/" className="spotify-nav-item">
               <Home size={20} />
               <span>Accueil</span>
-            </a>
-            <a href="/recherche" className="spotify-nav-item">
-              <Search size={20} />
-              <span>Rechercher</span>
             </a>
             <a href="/dictionnaires" className="spotify-nav-item">
               <Library size={20} />

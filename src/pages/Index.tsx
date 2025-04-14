@@ -1,11 +1,51 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle } from "lucide-react";
+import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle } from "lucide-react";
 import { LoremGenerator } from "@/components/loremipsum";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "react-router-dom";
+import { discoverDictionaries } from "@/utils/dictionaryUtils";
 
 const Index = () => {
+  const location = useLocation();
+  const [dictionaries, setDictionaries] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const selectedDictionary = location.state?.selectedDictionary;
+  
+  useEffect(() => {
+    const loadDictionaries = async () => {
+      setIsLoading(true);
+      try {
+        const dicts = await discoverDictionaries();
+        
+        // Add custom dictionaries from localStorage
+        const customDictsString = localStorage.getItem('custom_dictionaries');
+        if (customDictsString) {
+          try {
+            const customDicts = JSON.parse(customDictsString);
+            if (Array.isArray(customDicts)) {
+              setDictionaries([...dicts, ...customDicts]);
+            } else {
+              setDictionaries(dicts);
+            }
+          } catch (e) {
+            console.error('Error parsing custom dictionaries:', e);
+            setDictionaries(dicts);
+          }
+        } else {
+          setDictionaries(dicts);
+        }
+      } catch (error) {
+        console.error("Error loading dictionaries:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadDictionaries();
+  }, []);
+
   return (
     <div className="spotify-container">
       <div className="spotify-main">
@@ -19,10 +59,6 @@ const Index = () => {
             <a href="/" className="spotify-nav-item font-bold text-spotify">
               <Home size={20} />
               <span>Accueil</span>
-            </a>
-            <a href="/recherche" className="spotify-nav-item">
-              <Search size={20} />
-              <span>Rechercher</span>
             </a>
             <a href="/dictionnaires" className="spotify-nav-item">
               <Library size={20} />
@@ -47,6 +83,10 @@ const Index = () => {
                 <Layers size={16} />
                 <span>Développement</span>
               </a>
+              <a href="/dictionnaire/biere" className="block text-sm spotify-nav-item">
+                <Layers size={16} />
+                <span>Bière</span>
+              </a>
               <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item">
                 <ArrowDownCircle size={16} />
                 <span>Créer un dictionnaire</span>
@@ -59,7 +99,14 @@ const Index = () => {
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold mb-6 text-spotify">Générateur Lorem Ipsum</h1>
             <div className="animate-fade-in">
-              <LoremGenerator />
+              {isLoading ? (
+                <div className="py-10 text-center text-muted-foreground">Chargement des dictionnaires...</div>
+              ) : (
+                <LoremGenerator 
+                  initialDictionary={selectedDictionary} 
+                  availableDictionaries={dictionaries}
+                />
+              )}
             </div>
           </div>
         </main>

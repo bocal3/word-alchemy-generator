@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Search, PlusCircle, Music, Layers, ArrowDownCircle } from "lucide-react";
+import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -41,10 +41,6 @@ const Dictionnaires = () => {
             <a href="/" className="spotify-nav-item">
               <Home size={20} />
               <span>Accueil</span>
-            </a>
-            <a href="/recherche" className="spotify-nav-item">
-              <Search size={20} />
-              <span>Rechercher</span>
             </a>
             <a href="/dictionnaires" className="spotify-nav-item font-bold text-spotify">
               <Library size={20} />

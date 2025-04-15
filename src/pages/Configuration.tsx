@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { getAllDictionaries } from "@/utils/dictionaryUtils";
+import { getAllDictionaries, getDictionaryWords } from "@/utils/dictionaryUtils";
 import { Logo } from "@/components/ui/logo";
 import Sidebar from "@/components/layout/Sidebar";
 
@@ -140,6 +140,67 @@ const Configuration = () => {
     setConfigData(e.target.value);
   };
 
+  const handleExportAllData = async () => {
+    try {
+      setIsLoading(true);
+      // Get all dictionaries
+      const dictionaries = await getAllDictionaries();
+      
+      // Create an object to store all dictionary words
+      const allDictionaryData: Record<string, string[]> = {};
+      
+      // Fetch words for each dictionary (including both default and user-added words)
+      await Promise.all(dictionaries.map(async (dict) => {
+        const words = await getDictionaryWords(dict.id);
+        allDictionaryData[dict.id] = words;
+      }));
+      
+      // Get created dictionaries list
+      const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
+      const createdDictionaries = createdDictionariesJSON ? JSON.parse(createdDictionariesJSON) : [];
+      
+      // Create a complete data object
+      const completeData = {
+        dictionaries: allDictionaryData,
+        createdDictionaries: createdDictionaries,
+        // Add any other app data that should be included
+        exportDate: new Date().toISOString(),
+        appVersion: "1.0.0"
+      };
+      
+      // Convert to JSON
+      const jsonData = JSON.stringify(completeData, null, 2);
+      
+      // Create a blob and trigger download
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'psum-complete-data.json';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Succès",
+        description: "Toutes les données ont été téléchargées avec succès",
+      });
+    } catch (error) {
+      console.error("Error exporting all data:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'exporter toutes les données",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="psum-container">
       <div className="psum-main">
@@ -202,7 +263,8 @@ const Configuration = () => {
               <Button 
                 variant="outline" 
                 className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
-                onClick={handleExportConfig}
+                onClick={handleExportAllData}
+                disabled={isLoading}
               >
                 <DownloadCloud className="mr-2 h-4 w-4" />
                 Télécharger toutes les données

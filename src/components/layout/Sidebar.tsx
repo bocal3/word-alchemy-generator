@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Settings } from "lucide-react";
+import { Home, Library, Settings, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/ui/logo";
 
@@ -31,6 +31,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
         >
           <Library size={20} />
           <span>Dictionnaires</span>
+        </Link>
+        <Link 
+          to="/creer-dictionnaire" 
+          className={activePage === "create-dictionary" ? "psum-nav-item-active" : "psum-nav-item"}
+        >
+          <PlusCircle size={20} />
+          <span>Créer un dictionnaire</span>
         </Link>
         <Link 
           to="/configuration" 

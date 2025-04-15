@@ -1,7 +1,5 @@
 
 import React, { useState } from "react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { createDictionary } from "@/utils/dictionaryUtils";
+import { Save } from "lucide-react";
+import Sidebar from "@/components/layout/Sidebar";
 
 const CreerDictionnaire = () => {
   const { toast } = useToast();
@@ -86,114 +86,68 @@ const CreerDictionnaire = () => {
   };
 
   return (
-    <div className="spotify-container">
-      <div className="spotify-main">
-        <aside className="spotify-sidebar">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Psum</h2>
-            <ThemeToggle />
-          </div>
+    <div className="flex h-screen">
+      <Sidebar activePage="create-dictionary" />
+      
+      <main className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6 text-spotify">Créer un nouveau dictionnaire</h1>
           
-          <nav className="space-y-1">
-            <a href="/" className="spotify-nav-item">
-              <Home size={20} />
-              <span>Accueil</span>
-            </a>
-            <a href="/dictionnaires" className="spotify-nav-item">
-              <Library size={20} />
-              <span>Dictionnaires</span>
-            </a>
-          </nav>
-          
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-sidebar-foreground">DICTIONNAIRES</h3>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <PlusCircle size={16} />
+          <Card className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Nom du dictionnaire</Label>
+                <Input 
+                  id="name" 
+                  value={name} 
+                  onChange={e => setName(e.target.value)} 
+                  placeholder="Ex: Science Fiction"
+                />
+                {name && (
+                  <p className="text-xs text-muted-foreground">
+                    Identifiant: {generateSlug(name)}
+                  </p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (optionnelle)</Label>
+                <Textarea 
+                  id="description" 
+                  value={description} 
+                  onChange={e => setDescription(e.target.value)} 
+                  placeholder="Décrivez votre dictionnaire..."
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="words">Mots (un par ligne)</Label>
+                <Textarea 
+                  id="words" 
+                  value={words} 
+                  onChange={e => setWords(e.target.value)} 
+                  placeholder="Entrez vos mots, un par ligne..."
+                  className="min-h-32"
+                />
+                {words && (
+                  <p className="text-xs text-muted-foreground">
+                    {words.split('\n').filter(w => w.trim().length > 0).length} mot(s)
+                  </p>
+                )}
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
+                disabled={isSubmitting}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {isSubmitting ? 'Création en cours...' : 'Enregistrer le dictionnaire'}
               </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <a href="/dictionnaire/latin" className="block text-sm spotify-nav-item">
-                <Music size={16} />
-                <span>Latin</span>
-              </a>
-              <a href="/dictionnaire/developpement" className="block text-sm spotify-nav-item">
-                <Layers size={16} />
-                <span>Développement</span>
-              </a>
-              <a href="/dictionnaire/biere" className="block text-sm spotify-nav-item">
-                <Layers size={16} />
-                <span>Bière</span>
-              </a>
-              <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item font-bold text-spotify">
-                <ArrowDownCircle size={16} />
-                <span>Créer un dictionnaire</span>
-              </a>
-            </div>
-          </div>
-        </aside>
-        
-        <main className="spotify-content">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 text-spotify">Créer un nouveau dictionnaire</h1>
-            
-            <Card className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nom du dictionnaire</Label>
-                  <Input 
-                    id="name" 
-                    value={name} 
-                    onChange={e => setName(e.target.value)} 
-                    placeholder="Ex: Science Fiction"
-                  />
-                  {name && (
-                    <p className="text-xs text-muted-foreground">
-                      Identifiant: {generateSlug(name)}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description (optionnelle)</Label>
-                  <Textarea 
-                    id="description" 
-                    value={description} 
-                    onChange={e => setDescription(e.target.value)} 
-                    placeholder="Décrivez votre dictionnaire..."
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="words">Mots (un par ligne)</Label>
-                  <Textarea 
-                    id="words" 
-                    value={words} 
-                    onChange={e => setWords(e.target.value)} 
-                    placeholder="Entrez vos mots, un par ligne..."
-                    className="min-h-32"
-                  />
-                  {words && (
-                    <p className="text-xs text-muted-foreground">
-                      {words.split('\n').filter(w => w.trim().length > 0).length} mot(s)
-                    </p>
-                  )}
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
-                  disabled={isSubmitting}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSubmitting ? 'Création en cours...' : 'Enregistrer le dictionnaire'}
-                </Button>
-              </form>
-            </Card>
-          </div>
-        </main>
-      </div>
+            </form>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 };

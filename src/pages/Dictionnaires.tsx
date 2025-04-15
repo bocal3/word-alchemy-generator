@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect } from "react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { getAllDictionaries } from "@/utils/dictionaryUtils";
-import { Logo } from "@/components/ui/logo";
+import Sidebar from "@/components/layout/Sidebar";
 
 const Dictionnaires = () => {
   const navigate = useNavigate();
@@ -32,27 +31,7 @@ const Dictionnaires = () => {
   return (
     <div className="psum-container">
       <div className="psum-main">
-        <aside className="psum-sidebar">
-          <div className="flex justify-between items-center mb-6">
-            <Logo />
-            <ThemeToggle />
-          </div>
-          
-          <nav className="space-y-1">
-            <a href="/" className="psum-nav-item">
-              <Home size={20} />
-              <span>Accueil</span>
-            </a>
-            <a href="/dictionnaires" className="psum-nav-item-active">
-              <Library size={20} />
-              <span>Dictionnaires</span>
-            </a>
-          </nav>
-          
-          <div className="mt-auto pt-6 border-t border-sidebar-border">
-            <p className="text-xs text-sidebar-foreground/60">© 2025 Psum - Générateur de texte</p>
-          </div>
-        </aside>
+        <Sidebar activePage="dictionaries" />
         
         <main className="psum-content">
           <div className="max-w-4xl mx-auto">

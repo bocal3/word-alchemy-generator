@@ -10,7 +10,7 @@ interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({ 
   className, 
-  src = "/img/logo.png", 
+  src = "/src/img/logo.webp", 
   alt = "Psum Logo" 
 }) => {
   return (

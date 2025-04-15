@@ -9,6 +9,7 @@ import Recherche from "./pages/Recherche";
 import Dictionnaires from "./pages/Dictionnaires";
 import DictionnaireDetail from "./pages/DictionnaireDetail";
 import CreerDictionnaire from "./pages/CreerDictionnaire";
+import Configuration from "./pages/Configuration";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/dictionnaires" element={<Dictionnaires />} />
             <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
             <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
+            <Route path="/configuration" element={<Configuration />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

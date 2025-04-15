@@ -1,11 +1,9 @@
 
 import React, { useEffect, useState } from "react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library } from "lucide-react";
-import { LoremGenerator } from "@/components/loremipsum";
 import { useLocation } from "react-router-dom";
+import { LoremGenerator } from "@/components/loremipsum";
 import { discoverDictionaries } from "@/utils/dictionaryUtils";
-import { Logo } from "@/components/ui/logo";
+import Sidebar from "@/components/layout/Sidebar";
 
 const Index = () => {
   const location = useLocation();
@@ -32,27 +30,7 @@ const Index = () => {
   return (
     <div className="psum-container">
       <div className="psum-main">
-        <aside className="psum-sidebar">
-          <div className="flex justify-between items-center mb-6">
-            <Logo />
-            <ThemeToggle />
-          </div>
-          
-          <nav className="space-y-1">
-            <a href="/" className="psum-nav-item-active">
-              <Home size={20} />
-              <span>Accueil</span>
-            </a>
-            <a href="/dictionnaires" className="psum-nav-item">
-              <Library size={20} />
-              <span>Dictionnaires</span>
-            </a>
-          </nav>
-          
-          <div className="mt-auto pt-6 border-t border-sidebar-border">
-            <p className="text-xs text-sidebar-foreground/60">© 2025 Psum - Générateur de texte</p>
-          </div>
-        </aside>
+        <Sidebar activePage="home" />
         
         <main className="psum-content">
           <div className="max-w-4xl mx-auto">

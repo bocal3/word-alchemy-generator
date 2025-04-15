@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, PlusCircle, Music, Layers, ArrowDownCircle, Play, Download, Plus } from "lucide-react";
+import { PlusCircle, Play, Download, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { loadDictionary, saveDictionary, getDictionaryWords } from "@/utils/dictionaryUtils";
+import Sidebar from "@/components/layout/Sidebar";
 
 const DictionnaireDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,65 +95,54 @@ const DictionnaireDetail = () => {
     navigate('/', { state: { selectedDictionary: id } });
   };
 
+  const handleDownloadDictionary = () => {
+    try {
+      // Create object with dictionary data
+      const dictData = {
+        id,
+        title: dictionary.title,
+        description: dictionary.description,
+        words: dictionary.words
+      };
+      
+      // Convert to JSON
+      const jsonData = JSON.stringify(dictData, null, 2);
+      
+      // Create a blob
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a link and trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dictionnaire-${id}.json`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Téléchargement réussi",
+        description: `Le dictionnaire "${dictionary.title}" a été téléchargé.`,
+      });
+    } catch (error) {
+      console.error("Erreur lors du téléchargement du dictionnaire:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de télécharger le dictionnaire",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
-    <div className="spotify-container">
-      <div className="spotify-main">
-        <aside className="spotify-sidebar">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">Lorem Ipsum</h2>
-            <ThemeToggle />
-          </div>
-          
-          <nav className="space-y-1">
-            <a href="/" className="spotify-nav-item">
-              <Home size={20} />
-              <span>Accueil</span>
-            </a>
-            <a href="/dictionnaires" className="spotify-nav-item">
-              <Library size={20} />
-              <span>Dictionnaires</span>
-            </a>
-          </nav>
-          
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-sidebar-foreground">DICTIONNAIRES</h3>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <PlusCircle size={16} />
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              <a 
-                href="/dictionnaire/latin" 
-                className={`block text-sm spotify-nav-item ${id === 'latin' ? 'font-bold text-spotify' : ''}`}
-              >
-                <Music size={16} />
-                <span>Latin</span>
-              </a>
-              <a 
-                href="/dictionnaire/developpement" 
-                className={`block text-sm spotify-nav-item ${id === 'developpement' ? 'font-bold text-spotify' : ''}`}
-              >
-                <Layers size={16} />
-                <span>Développement</span>
-              </a>
-              <a 
-                href="/dictionnaire/biere" 
-                className={`block text-sm spotify-nav-item ${id === 'biere' ? 'font-bold text-spotify' : ''}`}
-              >
-                <Layers size={16} />
-                <span>Bière</span>
-              </a>
-              <a href="/creer-dictionnaire" className="block text-sm spotify-nav-item">
-                <ArrowDownCircle size={16} />
-                <span>Créer un dictionnaire</span>
-              </a>
-            </div>
-          </div>
-        </aside>
+    <div className="psum-container">
+      <div className="psum-main">
+        <Sidebar activePage="dictionary-detail" />
         
-        <main className="spotify-content">
+        <main className="psum-content">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-end gap-6 mb-8">
               <div className="w-36 h-36 bg-spotify/20 flex items-center justify-center rounded-md text-5xl font-bold text-spotify">
@@ -172,7 +161,11 @@ const DictionnaireDetail = () => {
                 <Play className="mr-2 h-4 w-4" />
                 Générer du texte
               </Button>
-              <Button variant="outline" className="rounded-full">
+              <Button 
+                variant="outline" 
+                className="rounded-full"
+                onClick={handleDownloadDictionary}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Télécharger
               </Button>

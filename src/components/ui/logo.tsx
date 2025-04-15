@@ -4,20 +4,18 @@ import { cn } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
-  src?: string;
-  alt?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ 
-  className, 
-  src = "/src/img/logo.png", 
-  alt = "Psum Logo" 
-}) => {
+export const Logo: React.FC<LogoProps> = ({ className }) => {
   return (
-    <img 
-      src={src} 
-      alt={alt} 
-      className={cn("w-10 h-10 rounded-full object-cover", className)}
-    />
+    <span 
+      className={cn(
+        "text-2xl font-bold", 
+        className
+      )}
+      style={{ color: '#668fcc' }}
+    >
+      [Psum]
+    </span>
   );
 };

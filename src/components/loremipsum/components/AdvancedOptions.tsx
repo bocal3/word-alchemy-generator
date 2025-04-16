@@ -17,14 +17,16 @@ const Slider = React.forwardRef<
     <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
       <SliderPrimitive.Range className="absolute h-full bg-primary" />
     </SliderPrimitive.Track>
+
     {Array.isArray(props.value) && props.value.map((val, index) => (
       <SliderPrimitive.Thumb
         key={index}
-        className="relative block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        className="relative flex items-center justify-center h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
       >
-        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
+        {/* Affichage de la valeur sous le curseur */}
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
           {val}
-        </span>
+        </div>
       </SliderPrimitive.Thumb>
     ))}
   </SliderPrimitive.Root>

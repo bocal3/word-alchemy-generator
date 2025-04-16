@@ -10,9 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { getAllDictionaries, getDictionaryWords } from "@/utils/dictionaryUtils";
 import { Logo } from "@/components/ui/logo";
 import Sidebar from "@/components/layout/Sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSelector } from "@/components/ui/language-selector";
 
 const Configuration = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [configData, setConfigData] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   
@@ -52,8 +55,8 @@ const Configuration = () => {
       } catch (error) {
         console.error("Error loading configurations:", error);
         toast({
-          title: "Erreur",
-          description: "Impossible de charger les configurations",
+          title: t('alert.error'),
+          description: t('alert.config.error.message'),
           variant: "destructive"
         });
       } finally {
@@ -62,7 +65,7 @@ const Configuration = () => {
     };
     
     loadConfigurations();
-  }, [toast]);
+  }, [toast, t]);
   
   const handleExportConfig = () => {
     try {
@@ -82,14 +85,14 @@ const Configuration = () => {
       document.body.removeChild(a);
       
       toast({
-        title: "Succès",
-        description: "Configuration exportée avec succès",
+        title: t('alert.success'),
+        description: t('alert.config.success.message'),
       });
     } catch (error) {
       console.error("Error exporting configuration:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'exporter la configuration",
+        title: t('alert.error'),
+        description: t('alert.config.error.message'),
         variant: "destructive"
       });
     }
@@ -120,14 +123,14 @@ const Configuration = () => {
         setConfigData(JSON.stringify(config, null, 2));
         
         toast({
-          title: "Succès",
-          description: "Configuration importée avec succès",
+          title: t('alert.success'),
+          description: t('alert.config.success.message'),
         });
       } catch (error) {
         console.error("Error importing configuration:", error);
         toast({
-          title: "Erreur",
-          description: "Impossible d'importer la configuration. Vérifiez le format du fichier.",
+          title: t('alert.error'),
+          description: t('alert.config.error.message'),
           variant: "destructive"
         });
       }
@@ -186,14 +189,14 @@ const Configuration = () => {
       document.body.removeChild(a);
       
       toast({
-        title: "Succès",
-        description: "Toutes les données ont été téléchargées avec succès",
+        title: t('alert.success'),
+        description: t('alert.download.success.message').replace('{title}', 'Psum'),
       });
     } catch (error) {
       console.error("Error exporting all data:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible d'exporter toutes les données",
+        title: t('alert.error'),
+        description: t('alert.download.error.message'),
         variant: "destructive"
       });
     } finally {
@@ -208,12 +211,15 @@ const Configuration = () => {
         
         <main className="psum-content">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 text-spotify">Configuration</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold text-spotify">{t('config.title')}</h1>
+              <LanguageSelector />
+            </div>
             
             <Card className="p-6 mb-6">
-              <h2 className="text-xl font-bold mb-4">Sauvegarde et restauration</h2>
+              <h2 className="text-xl font-bold mb-4">{t('config.title')}</h2>
               <p className="text-muted-foreground mb-4">
-                Exportez vos configurations pour les sauvegarder ou les importer sur un autre appareil.
+                {t('alert.save.reminder')}
               </p>
               
               <div className="flex gap-4 mb-6">
@@ -222,7 +228,7 @@ const Configuration = () => {
                   onClick={handleExportConfig}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Exporter la configuration
+                  {t('config.save')}
                 </Button>
                 
                 <div className="relative">
@@ -235,16 +241,16 @@ const Configuration = () => {
                   />
                   <Button variant="outline">
                     <Upload className="mr-2 h-4 w-4" />
-                    Importer une configuration
+                    {t('config.save')}
                   </Button>
                 </div>
               </div>
               
               <Separator className="my-4" />
               
-              <h3 className="font-semibold mb-2">Configuration actuelle</h3>
+              <h3 className="font-semibold mb-2">{t('config.title')}</h3>
               {isLoading ? (
-                <div className="py-10 text-center text-muted-foreground">Chargement des configurations...</div>
+                <div className="py-10 text-center text-muted-foreground">{t('generator.loading')}</div>
               ) : (
                 <Textarea
                   className="font-mono text-sm h-[300px]"
@@ -255,9 +261,9 @@ const Configuration = () => {
             </Card>
             
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-4">Télécharger toutes les données</h2>
+              <h2 className="text-xl font-bold mb-4">{t('config.download')}</h2>
               <p className="text-muted-foreground mb-4">
-                Téléchargez tous vos dictionnaires et configurations dans un seul fichier.
+                {t('alert.save.reminder')}
               </p>
               
               <Button 
@@ -267,7 +273,7 @@ const Configuration = () => {
                 disabled={isLoading}
               >
                 <DownloadCloud className="mr-2 h-4 w-4" />
-                Télécharger toutes les données
+                {t('config.download')}
               </Button>
             </Card>
           </div>

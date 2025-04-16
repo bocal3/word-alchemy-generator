@@ -12,32 +12,43 @@ import CreerDictionnaire from "./pages/CreerDictionnaire";
 import Configuration from "./pages/Configuration";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/theme-provider";
-import { LanguageProvider } from "@/contexts/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-// Update title
-document.title = "Psum - Générateur de texte";
+const AppContent = () => {
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    // Update title based on language
+    document.title = `${t('app.name')} - ${t('app.description')}`;
+  }, [t]);
+
+  return (
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/recherche" element={<Recherche />} />
+          <Route path="/dictionnaires" element={<Dictionnaires />} />
+          <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
+          <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
+          <Route path="/configuration" element={<Configuration />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  );
+};
 
 const App = () => (
   <ThemeProvider defaultTheme="light">
     <LanguageProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/recherche" element={<Recherche />} />
-              <Route path="/dictionnaires" element={<Dictionnaires />} />
-              <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
-              <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
-              <Route path="/configuration" element={<Configuration />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AppContent />
       </QueryClientProvider>
     </LanguageProvider>
   </ThemeProvider>

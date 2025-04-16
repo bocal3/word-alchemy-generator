@@ -4,9 +4,11 @@ import { useLocation } from "react-router-dom";
 import { LoremGenerator } from "@/components/loremipsum";
 import { discoverDictionaries } from "@/utils/dictionaryUtils";
 import Sidebar from "@/components/layout/Sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const location = useLocation();
+  const { t, language } = useLanguage();
   const [dictionaries, setDictionaries] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const selectedDictionary = location.state?.selectedDictionary;
@@ -15,7 +17,7 @@ const Index = () => {
     const loadDictionaries = async () => {
       setIsLoading(true);
       try {
-        const dicts = await discoverDictionaries();
+        const dicts = await discoverDictionaries(language);
         setDictionaries(dicts);
       } catch (error) {
         console.error("Error loading dictionaries:", error);
@@ -25,7 +27,7 @@ const Index = () => {
     };
     
     loadDictionaries();
-  }, []);
+  }, [language]);
 
   return (
     <div className="psum-container">
@@ -34,10 +36,10 @@ const Index = () => {
         
         <main className="psum-content">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 text-spotify">Générateur Psum</h1>
+            <h1 className="text-3xl font-bold mb-6 text-spotify">{t('generator.title')}</h1>
             <div className="animate-fade-in rounded-xl overflow-hidden bg-card p-6 shadow-sm border border-border">
               {isLoading ? (
-                <div className="py-10 text-center text-muted-foreground">Chargement des dictionnaires...</div>
+                <div className="py-10 text-center text-muted-foreground">{t('generator.loading')}</div>
               ) : (
                 <LoremGenerator 
                   initialDictionary={selectedDictionary} 

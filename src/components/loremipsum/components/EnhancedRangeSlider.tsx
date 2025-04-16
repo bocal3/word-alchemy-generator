@@ -37,6 +37,10 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
       </div>
       <div className="flex justify-between mt-1">
         <span className="text-xs text-muted-foreground">{min}</span>
+        <div className="flex justify-around w-full px-8">
+          <span className="text-xs text-muted-foreground">{value[0]}</span>
+          <span className="text-xs text-muted-foreground">{value[1]}</span>
+        </div>
         <span className="text-xs text-muted-foreground">{max}</span>
       </div>
     </div>

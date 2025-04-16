@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
-import { Circle } from 'lucide-react';
 
 interface EnhancedRangeSliderProps {
   value: [number, number];
@@ -23,7 +22,7 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
   return (
     <div className="relative pt-1">
       <div className="flex justify-between items-center">
-        <Circle className="h-3 w-3 text-white fill-white stroke-gray-400" />
+        <div className="h-3 w-3 rounded-full border border-gray-400"></div>
         <Slider 
           value={value}
           min={min}
@@ -33,7 +32,7 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
           disabled={disabled}
           className="mx-1.5"
         />
-        <Circle className="h-3 w-3 text-white fill-white stroke-gray-400" />
+        <div className="h-3 w-3 rounded-full border border-gray-400"></div>
       </div>
       <div className="flex justify-between mt-1">
         <span className="text-xs text-muted-foreground">{min}</span>

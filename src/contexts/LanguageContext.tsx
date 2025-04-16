@@ -32,6 +32,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'nav.dictionaries': 'Dictionaries',
     'nav.create': 'Create Dictionary',
     'nav.config': 'Configuration',
+    'nav.search': 'Search',
     
     // Generator
     'generator.title': 'Psum Generator',
@@ -60,6 +61,9 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'dictionary.word.empty': 'Please enter a valid word',
     'dictionary.word.exists': 'This word already exists in the dictionary',
     'dictionary.word.deleted': 'has been removed from the dictionary',
+    'dictionary.thematic': 'Thematic dictionary',
+    'dictionary.dev': 'Development',
+    'dictionary.cuisine': 'Cooking',
     
     // Create dictionary
     'create.title': 'Create a new dictionary',
@@ -88,6 +92,14 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'config.download': 'Download all data',
     'config.language': 'Language',
     
+    // Search
+    'search.title': 'Search for a dictionary',
+    'search.placeholder': 'Search for words, dictionaries...',
+    'search.button': 'Search',
+    
+    // Dictionaries page
+    'dictionaries.all': 'All dictionaries',
+    
     // Alerts and messages
     'alert.save.reminder': "Don't forget to save your configuration, or you'll lose changes if the cache is cleared.",
     'alert.success': 'Success',
@@ -112,6 +124,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'nav.dictionaries': 'Dictionnaires',
     'nav.create': 'Créer un dictionnaire',
     'nav.config': 'Configuration',
+    'nav.search': 'Rechercher',
     
     // Generator
     'generator.title': 'Générateur Psum',
@@ -140,6 +153,9 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'dictionary.word.empty': 'Veuillez entrer un mot valide',
     'dictionary.word.exists': 'Ce mot existe déjà dans le dictionnaire',
     'dictionary.word.deleted': 'a été supprimé du dictionnaire',
+    'dictionary.thematic': 'Dictionnaire thématique',
+    'dictionary.dev': 'Développement',
+    'dictionary.cuisine': 'Cuisine',
     
     // Create dictionary
     'create.title': 'Créer un nouveau dictionnaire',
@@ -168,6 +184,14 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'config.download': 'Télécharger toutes les données',
     'config.language': 'Langue',
     
+    // Search
+    'search.title': 'Rechercher un dictionnaire',
+    'search.placeholder': 'Rechercher des mots, des dictionnaires...',
+    'search.button': 'Rechercher',
+    
+    // Dictionaries page
+    'dictionaries.all': 'Tous les dictionnaires',
+    
     // Alerts and messages
     'alert.save.reminder': "N'oubliez pas de sauvegarder votre configuration, sinon vos modifications seront perdues si vous videz ou changez de navigateur.",
     'alert.success': 'Succès',
@@ -192,6 +216,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'nav.dictionaries': 'Diccionarios',
     'nav.create': 'Crear diccionario',
     'nav.config': 'Configuración',
+    'nav.search': 'Buscar',
     
     // Generator
     'generator.title': 'Generador Psum',
@@ -220,6 +245,9 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'dictionary.word.empty': 'Por favor introduce una palabra válida',
     'dictionary.word.exists': 'Esta palabra ya existe en el diccionario',
     'dictionary.word.deleted': 'ha sido eliminada del diccionario',
+    'dictionary.thematic': 'Diccionario temático',
+    'dictionary.dev': 'Desarrollo',
+    'dictionary.cuisine': 'Cocina',
     
     // Create dictionary
     'create.title': 'Crear un nuevo diccionario',
@@ -247,6 +275,14 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'config.save': 'Guardar configuración',
     'config.download': 'Descargar todos los datos',
     'config.language': 'Idioma',
+    
+    // Search
+    'search.title': 'Buscar un diccionario',
+    'search.placeholder': 'Buscar palabras, diccionarios...',
+    'search.button': 'Buscar',
+    
+    // Dictionaries page
+    'dictionaries.all': 'Todos los diccionarios',
     
     // Alerts and messages
     'alert.save.reminder': "No olvides guardar tu configuración, o perderás los cambios si se borra la caché.",

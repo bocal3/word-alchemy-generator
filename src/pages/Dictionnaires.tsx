@@ -6,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { getAllDictionaries } from "@/utils/dictionaryUtils";
 import Sidebar from "@/components/layout/Sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Dictionnaires = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [dictionnaires, setDictionnaires] = useState<{ id: string; label: string; count: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -36,18 +38,18 @@ const Dictionnaires = () => {
         <main className="psum-content">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-spotify">Tous les dictionnaires</h1>
+              <h1 className="text-3xl font-bold text-spotify">{t('dictionaries.all')}</h1>
               <Button 
                 className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
                 onClick={() => navigate('/creer-dictionnaire')}
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Créer un dictionnaire
+                {t('nav.create')}
               </Button>
             </div>
             
             {isLoading ? (
-              <div className="py-10 text-center text-muted-foreground">Chargement des dictionnaires...</div>
+              <div className="py-10 text-center text-muted-foreground">{t('generator.loading')}</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {dictionnaires.map((dict) => (
@@ -57,7 +59,7 @@ const Dictionnaires = () => {
                     onClick={() => navigate(`/dictionnaire/${dict.id}`)}
                   >
                     <h3 className="font-bold mb-2">{dict.label}</h3>
-                    <p className="text-sm text-muted-foreground">{dict.count} mots</p>
+                    <p className="text-sm text-muted-foreground">{dict.count} {t('create.words.count')}</p>
                   </Card>
                 ))}
               </div>

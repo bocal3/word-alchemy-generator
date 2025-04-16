@@ -3,6 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface GeneratorOptionsProps {
   paragraphCount: number;
@@ -17,10 +18,12 @@ const GeneratorOptions: React.FC<GeneratorOptionsProps> = ({
   onParagraphCountChange,
   onSingleSentenceChange
 }) => {
+  const { t } = useLanguage();
+  
   return (
     <div className="flex items-center space-x-4">
       <div className={`flex items-center space-x-2 ${generateSingleSentence ? 'opacity-50' : ''}`}>
-        <Label htmlFor="paragraph-count" className="text-sm font-medium">Nombre de paragraphes:</Label>
+        <Label htmlFor="paragraph-count" className="text-sm font-medium">{t('generator.paragraphs')}:</Label>
         <Input
           id="paragraph-count"
           type="number"
@@ -41,7 +44,7 @@ const GeneratorOptions: React.FC<GeneratorOptionsProps> = ({
           onCheckedChange={onSingleSentenceChange}
         />
         <Label htmlFor="single-sentence" className="text-sm">
-          Générer une seule phrase
+          {t('generator.single.sentence')}
         </Label>
       </div>
     </div>

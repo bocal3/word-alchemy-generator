@@ -1,37 +1,78 @@
-import * as React from "react"
-import * as SliderPrimitive from "@radix-ui/react-slider"
-import { cn } from "@/lib/utils"
 
-const Slider = React.forwardRef<
-  React.ElementRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <SliderPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative flex w-full touch-none select-none items-center",
-      className
-    )}
-    {...props}
-  >
-    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
-      <SliderPrimitive.Range className="absolute h-full bg-primary" />
-    </SliderPrimitive.Track>
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { SlidersHorizontal } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-    {Array.isArray(props.value) && props.value.map((val, index) => (
-      <SliderPrimitive.Thumb
-        key={index}
-        className="relative flex items-center justify-center h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-      >
-        {/* Affichage de la valeur sous le curseur */}
-        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground whitespace-nowrap">
-          {val}
+interface RangeValue {
+  min: number;
+  max: number;
+}
+
+interface AdvancedOptionsProps {
+  advancedOptionsOpen: boolean;
+  setAdvancedOptionsOpen: (open: boolean) => void;
+  wordsPerSentence: RangeValue;
+  sentencesPerParagraph: RangeValue;
+  generateSingleSentence: boolean;
+  onWordsPerSentenceChange: (values: number[]) => void;
+  onSentencesPerParagraphChange: (values: number[]) => void;
+}
+
+const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
+  advancedOptionsOpen,
+  setAdvancedOptionsOpen,
+  wordsPerSentence,
+  sentencesPerParagraph,
+  generateSingleSentence,
+  onWordsPerSentenceChange,
+  onSentencesPerParagraphChange
+}) => {
+  return (
+    <Collapsible open={advancedOptionsOpen} onOpenChange={setAdvancedOptionsOpen} className="border rounded-md p-2">
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" className="flex w-full justify-between">
+          <span className="flex items-center">
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            Options avancées
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {advancedOptionsOpen ? "Masquer" : "Afficher"}
+          </span>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2">
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium mb-2">Nombre de mots par phrase: {wordsPerSentence.min} - {wordsPerSentence.max}</h3>
+            <Slider 
+              defaultValue={[wordsPerSentence.min, wordsPerSentence.max]}
+              min={3}
+              max={20}
+              step={1}
+              value={[wordsPerSentence.min, wordsPerSentence.max]}
+              onValueChange={onWordsPerSentenceChange}
+              className="my-4"
+            />
+          </div>
+          <div className={generateSingleSentence ? 'opacity-50' : ''}>
+            <h3 className="text-sm font-medium mb-2">Nombre de phrases par paragraphe: {sentencesPerParagraph.min} - {sentencesPerParagraph.max}</h3>
+            <Slider 
+              defaultValue={[sentencesPerParagraph.min, sentencesPerParagraph.max]}
+              min={1}
+              max={12}
+              step={1}
+              value={[sentencesPerParagraph.min, sentencesPerParagraph.max]}
+              onValueChange={onSentencesPerParagraphChange}
+              className="my-4"
+              disabled={generateSingleSentence}
+            />
+          </div>
         </div>
-      </SliderPrimitive.Thumb>
-    ))}
-  </SliderPrimitive.Root>
-))
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
-Slider.displayName = SliderPrimitive.Root.displayName
-
-export { Slider }
+export default AdvancedOptions;

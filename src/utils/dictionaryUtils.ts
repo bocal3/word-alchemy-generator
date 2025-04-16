@@ -1,12 +1,39 @@
 
 import type { Dictionary } from "@/components/loremipsum/utils/generateLorem";
+import { SupportedLanguage } from "@/contexts/LanguageContext";
 
-// Function to load dictionary data
-export const loadDictionary = async (name: string): Promise<Dictionary | null> => {
+// Function to get current language
+export const getCurrentLanguage = (): SupportedLanguage => {
+  const storedLang = localStorage.getItem('psum-language');
+  if (storedLang) {
+    try {
+      const lang = JSON.parse(storedLang) as SupportedLanguage;
+      return ['fr', 'en', 'es'].includes(lang) ? lang as SupportedLanguage : 'en';
+    } catch (e) {
+      console.error('Error parsing stored language:', e);
+      return 'en';
+    }
+  }
+  
+  // Default to browser language or English
+  const browserLang = navigator.language.split('-')[0];
+  return ['fr', 'en', 'es'].includes(browserLang) ? browserLang as SupportedLanguage : 'en';
+};
+
+// Function to load dictionary data with language support
+export const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary | null> => {
   try {
-    // Dynamic import of dictionary files
-    const module = await import(`../components/loremipsum/data/${name}.json`);
-    return module as Dictionary;
+    const lang = language || getCurrentLanguage();
+    
+    // Try language-specific import first
+    try {
+      const module = await import(`../components/loremipsum/data/${lang}/${name}.json`);
+      return module as Dictionary;
+    } catch (languageError) {
+      // Fallback to default location
+      const module = await import(`../components/loremipsum/data/${name}.json`);
+      return module as Dictionary;
+    }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);
     return null;
@@ -14,21 +41,23 @@ export const loadDictionary = async (name: string): Promise<Dictionary | null> =
 };
 
 // Function to save dictionary data
-export const saveDictionary = async (name: string, data: Partial<Dictionary>): Promise<boolean> => {
+export const saveDictionary = async (name: string, data: Partial<Dictionary>, language?: SupportedLanguage): Promise<boolean> => {
   try {
+    const lang = language || getCurrentLanguage();
+    
     // In a browser environment, we can't directly write to files
     // Here we'll use localStorage to simulate saving the dictionary
     // In a real production app, this would call an API endpoint
     
-    // Store the dictionary in localStorage
+    // Store the dictionary in localStorage with language prefix
     if (data.words) {
-      localStorage.setItem(`dictionary_${name}`, JSON.stringify(data.words));
+      localStorage.setItem(`dictionary_${lang}_${name}`, JSON.stringify(data.words));
       
       // Add to list of created dictionaries if it's a new one
-      const createdDictionaries = JSON.parse(localStorage.getItem('created_dictionaries') || '[]');
+      const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
       if (!createdDictionaries.includes(name)) {
         createdDictionaries.push(name);
-        localStorage.setItem('created_dictionaries', JSON.stringify(createdDictionaries));
+        localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(createdDictionaries));
       }
     }
     
@@ -39,13 +68,14 @@ export const saveDictionary = async (name: string, data: Partial<Dictionary>): P
   }
 };
 
-// Get combined words from file and localStorage
-export const getDictionaryWords = async (name: string): Promise<string[]> => {
-  const fileDict = await loadDictionary(name);
+// Get combined words from file and localStorage with language support
+export const getDictionaryWords = async (name: string, language?: SupportedLanguage): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  const fileDict = await loadDictionary(name, lang);
   const fileWords = fileDict?.words || [];
   
   // Check localStorage for additional words
-  const localWords = localStorage.getItem(`dictionary_${name}`);
+  const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
   let parsedLocalWords: string[] = [];
   
   if (localWords) {
@@ -60,8 +90,34 @@ export const getDictionaryWords = async (name: string): Promise<string[]> => {
   return [...fileWords, ...parsedLocalWords];
 };
 
-// Discover all dictionary files
-export const discoverDictionaries = async (): Promise<string[]> => {
+// Remove word from dictionary
+export const removeWordFromDictionary = async (name: string, wordToRemove: string, language?: SupportedLanguage): Promise<boolean> => {
+  try {
+    const lang = language || getCurrentLanguage();
+    
+    // Get existing words
+    const words = await getDictionaryWords(name, lang);
+    
+    // Filter out the word to remove
+    const updatedWords = words.filter(word => word !== wordToRemove);
+    
+    // If nothing changed, word wasn't found
+    if (words.length === updatedWords.length) {
+      return false;
+    }
+    
+    // Save back to storage
+    return await saveDictionary(name, { words: updatedWords }, lang);
+  } catch (error) {
+    console.error(`Error removing word from dictionary ${name}:`, error);
+    return false;
+  }
+};
+
+// Discover all dictionary files with language support
+export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  
   // In a real app, we would scan the directory
   // Here we'll use a predefined list of the core dictionaries
   const coreDictionaries = [
@@ -87,7 +143,7 @@ export const discoverDictionaries = async (): Promise<string[]> => {
   ];
   
   // Get created dictionaries from localStorage
-  const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
+  const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
   let createdDictionaries: string[] = [];
   
   if (createdDictionariesJSON) {
@@ -103,14 +159,15 @@ export const discoverDictionaries = async (): Promise<string[]> => {
 };
 
 // Get all available dictionaries with metadata
-export const getAllDictionaries = async (): Promise<{ id: string; label: string; count: number }[]> => {
+export const getAllDictionaries = async (language?: SupportedLanguage): Promise<{ id: string; label: string; count: number }[]> => {
   try {
-    const dictionaries = await discoverDictionaries();
+    const lang = language || getCurrentLanguage();
+    const dictionaries = await discoverDictionaries(lang);
     
     // Map dictionaries to metadata objects
     const dictionariesWithMeta = await Promise.all(
       dictionaries.map(async (id) => {
-        const words = await getDictionaryWords(id);
+        const words = await getDictionaryWords(id, lang);
         return {
           id,
           label: id.charAt(0).toUpperCase() + id.slice(1),
@@ -126,9 +183,11 @@ export const getAllDictionaries = async (): Promise<{ id: string; label: string;
   }
 };
 
-// Create a new dictionary
-export const createDictionary = async (name: string, words: string[]): Promise<boolean> => {
+// Create a new dictionary with language support
+export const createDictionary = async (name: string, words: string[], language?: SupportedLanguage): Promise<boolean> => {
   try {
+    const lang = language || getCurrentLanguage();
+    
     // Generate a slug from the dictionary name
     const slug = name
       .toLowerCase()
@@ -139,13 +198,13 @@ export const createDictionary = async (name: string, words: string[]): Promise<b
     
     // In a real app, we would write to a file
     // Here we'll use localStorage to simulate file creation
-    localStorage.setItem(`dictionary_${slug}`, JSON.stringify(words));
+    localStorage.setItem(`dictionary_${lang}_${slug}`, JSON.stringify(words));
     
     // Add to list of created dictionaries
-    const createdDictionaries = JSON.parse(localStorage.getItem('created_dictionaries') || '[]');
+    const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
     if (!createdDictionaries.includes(slug)) {
       createdDictionaries.push(slug);
-      localStorage.setItem('created_dictionaries', JSON.stringify(createdDictionaries));
+      localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(createdDictionaries));
     }
     
     return true;
@@ -156,17 +215,19 @@ export const createDictionary = async (name: string, words: string[]): Promise<b
 };
 
 // Add words to an existing dictionary
-export const addWordsToDictionary = async (name: string, newWords: string[]): Promise<boolean> => {
+export const addWordsToDictionary = async (name: string, newWords: string[], language?: SupportedLanguage): Promise<boolean> => {
   try {
+    const lang = language || getCurrentLanguage();
+    
     // Get existing words
-    const existingWords = await getDictionaryWords(name);
+    const existingWords = await getDictionaryWords(name, lang);
     
     // Combine and deduplicate
     const combinedWords = [...existingWords, ...newWords];
     const uniqueWords = [...new Set(combinedWords)];
     
     // Save back to storage
-    return await saveDictionary(name, { words: uniqueWords });
+    return await saveDictionary(name, { words: uniqueWords }, lang);
   } catch (error) {
     console.error(`Error adding words to dictionary ${name}:`, error);
     return false;

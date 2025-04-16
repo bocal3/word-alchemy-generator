@@ -12,6 +12,7 @@ import CreerDictionnaire from "./pages/CreerDictionnaire";
 import Configuration from "./pages/Configuration";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const queryClient = new QueryClient();
 
@@ -20,23 +21,25 @@ document.title = "Psum - Générateur de texte";
 
 const App = () => (
   <ThemeProvider defaultTheme="light">
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/recherche" element={<Recherche />} />
-            <Route path="/dictionnaires" element={<Dictionnaires />} />
-            <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
-            <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
-            <Route path="/configuration" element={<Configuration />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <LanguageProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/recherche" element={<Recherche />} />
+              <Route path="/dictionnaires" element={<Dictionnaires />} />
+              <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
+              <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
+              <Route path="/configuration" element={<Configuration />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </LanguageProvider>
   </ThemeProvider>
 );
 

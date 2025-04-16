@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
+import { SupportedLanguage } from '@/contexts/LanguageContext';
 
 export interface Dictionary {
   words: string[];
@@ -16,18 +18,35 @@ export interface GenerateLoremParams {
     max: number;
   };
   generateSingleSentence?: boolean;
+  language?: SupportedLanguage;
 }
 
-// Function to load dictionary data
-const loadDictionary = async (name: string): Promise<Dictionary> => {
+// Function to get current language from localStorage
+const getCurrentLanguage = (): SupportedLanguage => {
   try {
-    // Try to load from JSON file first
+    const storedLang = localStorage.getItem('psum-language');
+    if (!storedLang) return 'en';
+    
+    const parsedLang = JSON.parse(storedLang) as SupportedLanguage;
+    return ['fr', 'en', 'es'].includes(parsedLang) ? parsedLang : 'en';
+  } catch (error) {
+    console.error('Error getting current language:', error);
+    return 'en';
+  }
+};
+
+// Function to load dictionary data with language support
+const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary> => {
+  try {
+    const lang = language || getCurrentLanguage();
+    
+    // Try to load from language-specific directory first
     try {
-      const module = await import(`../data/${name}.json`);
+      const module = await import(`../data/${lang}/${name}.json`);
       const fileDict = module as Dictionary;
       
       // Check if we have additional words in localStorage
-      const localWords = localStorage.getItem(`dictionary_${name}`);
+      const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
       if (localWords) {
         try {
           const parsedLocalWords = JSON.parse(localWords);
@@ -42,20 +61,42 @@ const loadDictionary = async (name: string): Promise<Dictionary> => {
       
       return fileDict;
     } catch (importError) {
-      // If the file doesn't exist, check localStorage
-      const localWords = localStorage.getItem(`dictionary_${name}`);
-      if (localWords) {
-        try {
-          const parsedWords = JSON.parse(localWords);
-          return { words: parsedWords };
-        } catch (e) {
-          console.error('Error parsing localStorage dictionary:', e);
-          return { words: [] };
+      // If language-specific file doesn't exist, try the default directory
+      try {
+        const module = await import(`../data/${name}.json`);
+        const fileDict = module as Dictionary;
+        
+        // Check if we have additional words in localStorage
+        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+        if (localWords) {
+          try {
+            const parsedLocalWords = JSON.parse(localWords);
+            return { 
+              words: [...fileDict.words, ...parsedLocalWords] 
+            };
+          } catch (e) {
+            console.error('Error parsing localStorage dictionary:', e);
+            return fileDict;
+          }
         }
+        
+        return fileDict;
+      } catch (defaultImportError) {
+        // If no file exists, check localStorage only
+        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+        if (localWords) {
+          try {
+            const parsedWords = JSON.parse(localWords);
+            return { words: parsedWords };
+          } catch (e) {
+            console.error('Error parsing localStorage dictionary:', e);
+            return { words: [] };
+          }
+        }
+        
+        // No file and no localStorage data
+        return { words: [] };
       }
-      
-      // No file and no localStorage data
-      return { words: [] };
     }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);
@@ -98,25 +139,28 @@ export const generateLorem = async ({
   paragraphCount,
   wordsPerSentence,
   sentencesPerParagraph,
-  generateSingleSentence = false
+  generateSingleSentence = false,
+  language
 }: GenerateLoremParams): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  
   // Get the names of selected dictionaries
   const dictNames = Object.entries(selectedDictionaries)
     .filter(([_, isSelected]) => isSelected)
     .map(([name]) => name);
   
   if (dictNames.length === 0) {
-    return ['Veuillez sélectionner au moins un dictionnaire.'];
+    return ['Please select at least one dictionary.'];
   }
 
   // Load all selected dictionaries
-  const loadedDictionaries = await Promise.all(dictNames.map(name => loadDictionary(name)));
+  const loadedDictionaries = await Promise.all(dictNames.map(name => loadDictionary(name, lang)));
   
   // Combine all words from selected dictionaries
   const allWords = loadedDictionaries.flatMap(dict => dict.words || []);
   
   if (allWords.length === 0) {
-    return ['Aucun mot trouvé dans les dictionnaires sélectionnés.'];
+    return ['No words found in selected dictionaries.'];
   }
 
   // If we're generating just a single sentence
@@ -158,9 +202,11 @@ export const generateLorem = async ({
 };
 
 /**
- * Découvre dynamiquement les dictionnaires disponibles
+ * Discover dictionaries with language support
  */
-export const discoverDictionaries = async (): Promise<string[]> => {
+export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  
   const coreDictionaries = [
     'latin',
     'viande',
@@ -183,8 +229,8 @@ export const discoverDictionaries = async (): Promise<string[]> => {
     'philosophie'
   ];
   
-  // Get created dictionaries from localStorage
-  const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
+  // Get created dictionaries from localStorage with language prefix
+  const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
   let createdDictionaries: string[] = [];
   
   if (createdDictionariesJSON) {
@@ -211,7 +257,7 @@ export const useLoremGenerator = () => {
       setGeneratedText(result);
     } catch (error) {
       console.error('Error generating lorem ipsum:', error);
-      setGeneratedText(['Une erreur est survenue lors de la génération du texte.']);
+      setGeneratedText(['An error occurred while generating text.']);
     } finally {
       setIsGenerating(false);
     }

@@ -10,22 +10,26 @@ import { useNavigate } from "react-router-dom";
 import { createDictionary } from "@/utils/dictionaryUtils";
 import { Save } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { SaveReminder } from "@/components/ui/save-reminder";
 
 const CreerDictionnaire = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [words, setWords] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
       toast({
-        title: "Nom requis",
-        description: "Veuillez entrer un nom pour le dictionnaire.",
+        title: t('create.name.required'),
+        description: t('create.name.required.message'),
         variant: "destructive"
       });
       return;
@@ -33,8 +37,8 @@ const CreerDictionnaire = () => {
     
     if (!words.trim()) {
       toast({
-        title: "Mots requis",
-        description: "Veuillez entrer au moins quelques mots pour le dictionnaire.",
+        title: t('create.words.required'),
+        description: t('create.words.required.message'),
         variant: "destructive"
       });
       return;
@@ -55,19 +59,21 @@ const CreerDictionnaire = () => {
       
       if (success) {
         toast({
-          title: "Dictionnaire créé",
-          description: `Le dictionnaire "${name}" a été créé avec succès avec ${wordList.length} mots.`,
+          title: t('create.success'),
+          description: t('create.success.message')
+            .replace('{name}', name)
+            .replace('{count}', wordList.length.toString()),
         });
         
         // Navigate to dictionaries page after successful creation
         navigate('/dictionnaires');
       } else {
-        throw new Error("Échec de la création du dictionnaire");
+        throw new Error("Failed to create dictionary");
       }
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la création du dictionnaire.",
+        title: t('create.error'),
+        description: t('create.error.message'),
         variant: "destructive"
       });
     } finally {
@@ -85,69 +91,89 @@ const CreerDictionnaire = () => {
       .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
   };
 
+  // Show reminder when user starts typing
+  const handleInput = () => {
+    if (!showReminder) {
+      setShowReminder(true);
+    }
+  };
+
   return (
-    <div className="flex h-screen">
-      <Sidebar activePage="create-dictionary" />
-      
-      <main className="flex-1 overflow-auto p-6">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6 text-spotify">Créer un nouveau dictionnaire</h1>
-          
-          <Card className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom du dictionnaire</Label>
-                <Input 
-                  id="name" 
-                  value={name} 
-                  onChange={e => setName(e.target.value)} 
-                  placeholder="Ex: Science Fiction"
-                />
-                {name && (
-                  <p className="text-xs text-muted-foreground">
-                    Identifiant: {generateSlug(name)}
-                  </p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (optionnelle)</Label>
-                <Textarea 
-                  id="description" 
-                  value={description} 
-                  onChange={e => setDescription(e.target.value)} 
-                  placeholder="Décrivez votre dictionnaire..."
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="words">Mots (un par ligne)</Label>
-                <Textarea 
-                  id="words" 
-                  value={words} 
-                  onChange={e => setWords(e.target.value)} 
-                  placeholder="Entrez vos mots, un par ligne..."
-                  className="min-h-32"
-                />
-                {words && (
-                  <p className="text-xs text-muted-foreground">
-                    {words.split('\n').filter(w => w.trim().length > 0).length} mot(s)
-                  </p>
-                )}
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
-                disabled={isSubmitting}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isSubmitting ? 'Création en cours...' : 'Enregistrer le dictionnaire'}
-              </Button>
-            </form>
-          </Card>
-        </div>
-      </main>
+    <div className="psum-container">
+      <div className="psum-main">
+        <Sidebar activePage="create-dictionary" />
+        
+        <main className="psum-content">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6 text-spotify">{t('create.title')}</h1>
+            
+            <Card className="p-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t('create.name')}</Label>
+                  <Input 
+                    id="name" 
+                    value={name} 
+                    onChange={e => {
+                      setName(e.target.value);
+                      handleInput();
+                    }} 
+                    placeholder={t('create.name.placeholder')}
+                  />
+                  {name && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('create.id')}: {generateSlug(name)}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">{t('create.description')}</Label>
+                  <Textarea 
+                    id="description" 
+                    value={description} 
+                    onChange={e => {
+                      setDescription(e.target.value);
+                      handleInput();
+                    }} 
+                    placeholder={t('create.description.placeholder')}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="words">{t('create.words')}</Label>
+                  <Textarea 
+                    id="words" 
+                    value={words} 
+                    onChange={e => {
+                      setWords(e.target.value);
+                      handleInput();
+                    }} 
+                    placeholder={t('create.words.placeholder')}
+                    className="min-h-32"
+                  />
+                  {words && (
+                    <p className="text-xs text-muted-foreground">
+                      {words.split('\n').filter(w => w.trim().length > 0).length} {t('create.words.count')}
+                    </p>
+                  )}
+                </div>
+                
+                {showReminder && <SaveReminder />}
+                
+                <Button 
+                  type="submit" 
+                  className="bg-spotify hover:bg-spotify/90 text-spotify-foreground"
+                  disabled={isSubmitting}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSubmitting ? t('create.submitting') : t('create.button')}
+                </Button>
+              </form>
+            </Card>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

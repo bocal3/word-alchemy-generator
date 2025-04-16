@@ -1,14 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLoremGenerator, discoverDictionaries } from '../utils/generateLorem';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { RefreshCw } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Import refactored components
 import DictionarySelector from './DictionarySelector';
 import GeneratorOptions from './GeneratorOptions';
-import AdvancedOptions from './AdvancedOptions';
+import AdvancedOptionsWithI18n from './AdvancedOptionsWithI18n';
 import GeneratedContent from './GeneratedContent';
 
 interface GeneratorProps {
@@ -18,6 +20,7 @@ interface GeneratorProps {
 
 const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDictionaries = [] }) => {
   const { toast } = useToast();
+  const { t, language } = useLanguage();
   const { generate, isGenerating, generatedText } = useLoremGenerator();
   
   // State for available dictionaries
@@ -52,7 +55,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
         // Use provided dictionaries or discover them
         const dictionaries = availableDictionaries.length > 0 
           ? availableDictionaries 
-          : await discoverDictionaries();
+          : await discoverDictionaries(language);
         
         // Format dictionary list
         const formattedList = dictionaries.map(id => ({
@@ -83,7 +86,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
     };
     
     loadAvailableDictionaries();
-  }, [initialDictionary, availableDictionaries]);
+  }, [initialDictionary, availableDictionaries, language]);
   
   // Check if all dictionaries are selected
   useEffect(() => {
@@ -126,8 +129,8 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
     
     if (!atLeastOneDictionarySelected) {
       toast({
-        title: "Aucun dictionnaire sélectionné",
-        description: "Veuillez sélectionner au moins un dictionnaire pour générer du texte.",
+        title: t('alert.error'),
+        description: t('generator.no.dictionary'),
         variant: "destructive"
       });
       return;
@@ -138,7 +141,8 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
       paragraphCount,
       wordsPerSentence,
       sentencesPerParagraph,
-      generateSingleSentence
+      generateSingleSentence,
+      language
     });
   };
 
@@ -165,7 +169,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
       <div className="w-full max-w-4xl mx-auto p-4">
         <Card className="p-6">
           <div className="py-10 text-center text-muted-foreground">
-            Chargement des dictionnaires...
+            {t('generator.loading')}
           </div>
         </Card>
       </div>
@@ -176,10 +180,10 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-spotify">
-          Générateur Psum
+          {t('generator.title')}
         </h1>
         <p className="text-muted-foreground mt-2">
-          Générez du texte de remplissage thématique pour vos projets
+          {t('generator.description')}
         </p>
       </div>
       
@@ -202,8 +206,8 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
             onSingleSentenceChange={handleSingleSentenceChange}
           />
           
-          {/* Advanced options component */}
-          <AdvancedOptions
+          {/* Advanced options component with i18n */}
+          <AdvancedOptionsWithI18n
             advancedOptionsOpen={advancedOptionsOpen}
             setAdvancedOptionsOpen={setAdvancedOptionsOpen}
             wordsPerSentence={wordsPerSentence}
@@ -223,10 +227,10 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
               {isGenerating ? (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  Génération...
+                  {t('generator.generating')}
                 </>
               ) : (
-                'Générer'
+                t('generator.button')
               )}
             </Button>
           </div>

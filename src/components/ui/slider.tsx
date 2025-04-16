@@ -24,7 +24,7 @@ const Slider = React.forwardRef<
         key={index}
         className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
       >
-        <div className="h-3 w-3 rounded-full border border-blue-400 m-auto"></div>
+        
       </SliderPrimitive.Thumb>
     ))}
   </SliderPrimitive.Root>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Dictionary {
   id: string;
@@ -23,10 +24,12 @@ const DictionarySelector: React.FC<DictionarySelectorProps> = ({
   onDictionaryChange,
   onSelectAll
 }) => {
+  const { t } = useLanguage();
+  
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold text-lg">Sélectionnez vos dictionnaires</h2>
+        <h2 className="font-semibold text-lg">{t('generator.select.dictionaries')}</h2>
         <div className="flex items-center space-x-2">
           <Checkbox 
             id="checkbox-select-all" 
@@ -34,7 +37,7 @@ const DictionarySelector: React.FC<DictionarySelectorProps> = ({
             onCheckedChange={onSelectAll}
           />
           <Label htmlFor="checkbox-select-all" className="text-sm">
-            Tout sélectionner
+            {t('generator.select.all')}
           </Label>
         </div>
       </div>

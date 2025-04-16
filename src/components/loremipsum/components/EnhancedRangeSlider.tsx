@@ -22,7 +22,9 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
   return (
     <div className="relative pt-1">
       <div className="flex justify-between items-center">
-        <div className="h-3 w-3 rounded-full border border-gray-400"></div>
+        <div className="h-5 w-5 flex items-center justify-center">
+          <div className="h-3 w-3 rounded-full border border-blue-400"></div>
+        </div>
         <Slider 
           value={value}
           min={min}
@@ -32,11 +34,13 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
           disabled={disabled}
           className="mx-1.5"
         />
-        <div className="h-3 w-3 rounded-full border border-gray-400"></div>
+        <div className="h-5 w-5 flex items-center justify-center">
+          <div className="h-3 w-3 rounded-full border border-blue-400"></div>
+        </div>
       </div>
       <div className="flex justify-between mt-1">
         <span className="text-xs text-muted-foreground">{min}</span>
-        <div className="flex justify-around w-full px-8">
+        <div className="flex justify-between w-full px-8">
           <span className="text-xs text-muted-foreground">{value[0]}</span>
           <span className="text-xs text-muted-foreground">{value[1]}</span>
         </div>

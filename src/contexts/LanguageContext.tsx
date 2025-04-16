@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
@@ -46,6 +45,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'generator.advanced.options': 'Advanced options',
     'generator.words.per.sentence': 'Words per sentence',
     'generator.sentences.per.paragraph': 'Sentences per paragraph',
+    'generator.select.dictionaries': 'Select your dictionaries',
+    'generator.select.all': 'Select all',
     
     // Dictionaries
     'dictionary.title': 'Dictionary',
@@ -138,6 +139,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'generator.advanced.options': 'Options avancées',
     'generator.words.per.sentence': 'Mots par phrase',
     'generator.sentences.per.paragraph': 'Phrases par paragraphe',
+    'generator.select.dictionaries': 'Sélectionnez vos dictionnaires',
+    'generator.select.all': 'Tout sélectionner',
     
     // Dictionaries
     'dictionary.title': 'Dictionnaire',
@@ -230,6 +233,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'generator.advanced.options': 'Opciones avanzadas',
     'generator.words.per.sentence': 'Palabras por frase',
     'generator.sentences.per.paragraph': 'Frases por párrafo',
+    'generator.select.dictionaries': 'Selecciona tus diccionarios',
+    'generator.select.all': 'Seleccionar todo',
     
     // Dictionaries
     'dictionary.title': 'Diccionario',

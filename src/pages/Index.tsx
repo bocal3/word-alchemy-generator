@@ -10,6 +10,7 @@ const Index = () => {
   const { t, language } = useLanguage();
   const [dictionaries, setDictionaries] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [folderContent, setFolderContent] = useState<string>(''); // État pour le contenu du dossier
   const selectedDictionary = location.state?.selectedDictionary;
 
   useEffect(() => {
@@ -21,10 +22,11 @@ const Index = () => {
         setDictionaries(dicts);
         console.log(`📚 Dictionnaires chargés :`, dicts);
 
-        // Afficher un popup avec le contenu du dossier de langue
-        alert(`📂 Contenu du dossier pour la langue "${language}" :\n\n${dicts.join('\n')}`);
+        // Mettre à jour le contenu du dossier dans l'état
+        setFolderContent(`📂 Contenu du dossier pour la langue "${language}" :\n${dicts.join(', ')}`);
       } catch (error) {
         console.error("❌ Erreur lors du chargement des dictionnaires :", error);
+        setFolderContent(`❌ Erreur lors du chargement des dictionnaires pour la langue "${language}".`);
       } finally {
         setIsLoading(false);
       }
@@ -40,6 +42,8 @@ const Index = () => {
         
         <main className="psum-content">
           <div className="max-w-4xl mx-auto">
+            {/* Label pour afficher le contenu du dossier */}
+            <p className="text-sm text-muted-foreground mb-4 whitespace-pre-line">{folderContent}</p>
             <h1 className="text-3xl font-bold mb-6 text-spotify">{t('generator.title')}</h1>
             <div className="animate-fade-in rounded-xl overflow-hidden bg-card p-6 shadow-sm border border-border">
               {isLoading ? (

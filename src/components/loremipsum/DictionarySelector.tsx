@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useToast } from '@/components/ui/use-toast';
 import { Dictionary } from './utils/generateLorem';
 import { getAllDictionaries } from '@/utils/dictionaryUtils';
 import { Button } from '@/components/ui/button';
@@ -8,15 +7,11 @@ import { Link } from 'react-router-dom';
 
 export function DictionarySelector() {
   const { language } = useLanguage();
-  const { toast } = useToast();
   const [dictionaries, setDictionaries] = useState<{ id: string; label: string; count: number }[]>([]);
 
   useEffect(() => {
     // Afficher l'alerte de langue au chargement
-    toast({
-      title: "Langue actuelle",
-      description: `La langue sélectionnée est ${language.toUpperCase()}`,
-    });
+    alert("Voici la langue : " + language.toUpperCase());
 
     // Charger les dictionnaires
     const loadDictionaries = async () => {
@@ -24,7 +19,7 @@ export function DictionarySelector() {
       setDictionaries(allDictionaries);
     };
     loadDictionaries();
-  }, [language, toast]);
+  }, [language]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

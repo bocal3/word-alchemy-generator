@@ -253,6 +253,7 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
 // Get available dictionaries based on language
 export const getPotentialDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
+  console.log('🔍 Debug - Langue courante:', lang);
   let dictionaries: string[] = [];
 
   try {
@@ -263,21 +264,26 @@ export const getPotentialDictionaries = async (language?: SupportedLanguage): Pr
     const doc = parser.parseFromString(text, 'text/html');
     const links = doc.querySelectorAll('a');
     
+    console.log('📂 Debug - Fichiers trouvés dans le dossier:', lang);
+    
     // Add each dictionary file
     links.forEach(link => {
       const filename = link.textContent;
       if (filename && filename.endsWith('.json')) {
         const id = filename.replace('.json', '');
+        console.log('📄 Debug - Fichier dictionnaire trouvé:', id);
         dictionaries.push(id);
       }
     });
 
     // Add latin.json from root directory
+    console.log('➕ Debug - Ajout du dictionnaire latin');
     dictionaries.push('latin');
 
+    console.log('✅ Debug - Liste finale des dictionnaires:', dictionaries);
     return dictionaries;
   } catch (error) {
-    console.error('Error getting potential dictionaries:', error);
+    console.error('❌ Debug - Erreur lors de la récupération des dictionnaires:', error);
     return ['latin']; // Fallback to latin if error
   }
 };

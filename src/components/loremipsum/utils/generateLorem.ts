@@ -23,8 +23,6 @@ export interface GenerateLoremParams {
   language?: SupportedLanguage;
 }
 
-
-
 // Function to get current language from localStorage
 const getCurrentLanguage = (): SupportedLanguage => {
   try {
@@ -217,18 +215,12 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   const lang = language || getCurrentLanguage();
   let availableDictionaries: string[] = [];
 
-  
   // Check which dictionaries actually exist for the current language
   for (const dict of potentialDictionaries) {
     try {
-      // Latin is in the root directory, so handle it specially
-      try {
-        await import(`../data/${lang}/${dict}.json`);
-        availableDictionaries.push(dict);
-      } catch (e) {
-        // Dictionary not found for this language
+      availableDictionaries.push(dict);
     } catch (e) {
-      // Skip if import fails (dictionary doesn't exist)
+      // Dictionary not found for this language
     }
   }
   

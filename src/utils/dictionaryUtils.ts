@@ -283,13 +283,10 @@ const dictionaryDisplayNames: Record<SupportedLanguage, Record<string, string>> 
 
 // Function to get display name from filename
 const getDisplayName = (filename: string): string => {
-  // Remove .json extension and replace underscores with spaces
+  // Remove .json extension and capitalize first letter
   return filename
     .replace('.json', '')
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .charAt(0).toUpperCase() + filename.replace('.json', '').slice(1);
 };
 
 // Discover all dictionary files with language support

@@ -1,0 +1,17 @@
+{
+  "words": [
+    "magia", "brujería", "hechizo", "conjuro", "maldición", "profecía", "oráculo",
+    "reino", "imperio", "ciudad", "fortaleza", "castillo", "mazmorra", "torre", "aldea",
+    "taberna", "gremio", "realeza", "rey", "reina", "príncipe", "princesa", "caballero",
+    "paladín", "guerrero", "arquero", "explorador", "asesino", "ladrón", "mago", "hechicero",
+    "druida", "clérigo", "bardo", "héroe", "misión", "aventura", "viaje", "épico", "saga",
+    "dragón", "wyrm", "grifo", "unicornio", "fénix", "hidra", "trol", "ogro", "duende",
+    "orco", "elfo", "enano", "mediano", "hobbit", "hada", "ninfa", "dríada", "centauro",
+    "minotauro", "espada", "arco", "daga", "escudo", "armadura", "pergamino", "grimorio",
+    "artefacto", "reliquia", "tesoro", "gema", "cristal", "amuleto", "talismán",
+    "mago", "invocación", "ritual", "chamán", "élfico", "magia negra", "magia blanca",
+    "poder", "cetro", "batalla", "conjuración", "elixir", "herrero", "forja", "destino",
+    "leyenda", "mítico", "fantasía", "criatura", "féerico", "maravilla", "secreto",
+    "energía", "misterio", "nigromancia", "adivinación", "hechicería", "acertijo"
+  ]
+}

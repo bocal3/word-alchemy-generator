@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { SupportedLanguage } from '@/contexts/LanguageContext';
 
 export interface Dictionary {
+  id: string;
+  label: string;
   words: string[];
+  description?: string;
 }
 
 export interface GenerateLoremParams {
@@ -20,6 +23,14 @@ export interface GenerateLoremParams {
   language?: SupportedLanguage;
 }
 
+// List of potential dictionaries to check
+const potentialDictionaries = [
+  'viande', 'meat', 'carne',
+  'survie', 'survival', 'supervivencia',
+  'telerealite', 'realityTV', 'telerealidad',
+  'latin'
+];
+
 // Function to get current language from localStorage
 const getCurrentLanguage = (): SupportedLanguage => {
   try {
@@ -35,71 +46,75 @@ const getCurrentLanguage = (): SupportedLanguage => {
 };
 
 // Function to load dictionary data with language support
-const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary> => {
+const loadDictionary = async (id: string, language?: SupportedLanguage): Promise<Dictionary> => {
   try {
     const lang = language || getCurrentLanguage();
     
     // Try to load from language-specific directory first
     try {
-      const module = await import(`../data/${lang}/${name}.json`);
+      const module = await import(`../data/${lang}/${id}.json`);
       const fileDict = module as Dictionary;
       
       // Check if we have additional words in localStorage
-      const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+      const localWords = localStorage.getItem(`dictionary_${lang}_${id}`);
       if (localWords) {
         try {
           const parsedLocalWords = JSON.parse(localWords);
           return { 
+            id,
+            label: id,
             words: [...fileDict.words, ...parsedLocalWords] 
           };
         } catch (e) {
           console.error('Error parsing localStorage dictionary:', e);
-          return fileDict;
+          return { id, label: id, words: fileDict.words };
         }
       }
       
-      return fileDict;
+      return { id, label: id, words: fileDict.words };
     } catch (importError) {
       // If language-specific file doesn't exist, try the default directory
       try {
-        const module = await import(`../data/${name}.json`);
+        const module = await import(`../data/${id}.json`);
         const fileDict = module as Dictionary;
         
         // Check if we have additional words in localStorage
-        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+        const localWords = localStorage.getItem(`dictionary_${lang}_${id}`);
         if (localWords) {
           try {
             const parsedLocalWords = JSON.parse(localWords);
             return { 
+              id,
+              label: id,
               words: [...fileDict.words, ...parsedLocalWords] 
             };
           } catch (e) {
             console.error('Error parsing localStorage dictionary:', e);
-            return fileDict;
+            return { id, label: id, words: fileDict.words };
           }
         }
         
-        return fileDict;
+        return { id, label: id, words: fileDict.words };
       } catch (defaultImportError) {
         // If no file exists, check localStorage only
-        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+        const localWords = localStorage.getItem(`dictionary_${lang}_${id}`);
         if (localWords) {
           try {
             const parsedWords = JSON.parse(localWords);
-            return { words: parsedWords };
+            return { id, label: id, words: parsedWords };
           } catch (e) {
             console.error('Error parsing localStorage dictionary:', e);
-            return { words: [] };
+            return { id, label: id, words: [] };
           }
         }
         
         // No file and no localStorage data
-        return { words: [] };
+        return { id, label: id, words: [] };
       }
     }
   } catch (error) {
-    console.error(`Error loading dictionary ${name}:`, error);
-    return { words: [] };
+    console.error(`Error loading dictionary ${id}:`, error);
+    return { id, label: id, words: [] };
   }
 };
 

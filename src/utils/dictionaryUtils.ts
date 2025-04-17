@@ -1,4 +1,4 @@
-import type { Dictionary } from "@/components/loremipsum/utils/generateLorem";
+import { Dictionary } from '../components/loremipsum/utils/generateLorem';
 import { SupportedLanguage } from "@/contexts/LanguageContext";
 
 // Function to get current language
@@ -28,94 +28,69 @@ export const getCurrentLanguage = (): SupportedLanguage => {
 };
 
 // Function to load dictionary data with language support
-export const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary | null> => {
-  try {
-    const lang = language || getCurrentLanguage();
-    
-    // First try to load from localStorage
-    const localData = localStorage.getItem(`dictionary_${lang}_${name}`);
-    if (localData) {
-      try {
-        const parsedData = JSON.parse(localData);
-        return { words: parsedData.words };
-      } catch (e) {
-        console.error('Error parsing localStorage dictionary:', e);
-      }
-    }
-    
-    // Then try language-specific import
+export const loadDictionary = async (id: string, language?: string): Promise<Dictionary> => {
+  const lang = language || getCurrentLanguage();
+  
+  // Try to load from localStorage first
+  const localWords = localStorage.getItem(`dictionary_${lang}_${id}`);
+  if (localWords) {
     try {
-      const module = await import(`../components/loremipsum/data/${lang}/${name}.json`);
-      return module as Dictionary;
-    } catch (error) {
-      console.error(`Error loading dictionary ${name} for language ${lang}:`, error);
-      return null;
+      const words = JSON.parse(localWords);
+      return { id, label: id, words };
+    } catch (e) {
+      console.error('Error parsing localStorage dictionary:', e);
     }
+  }
+  
+  // If not in localStorage, try to load from language-specific JSON file
+  try {
+    const module = await import(`../components/loremipsum/data/${lang}/${id}.json`);
+    return { id, label: id, words: module.words };
   } catch (error) {
-    console.error(`Error loading dictionary ${name}:`, error);
-    return null;
+    console.error(`Error loading dictionary ${id}:`, error);
+    return { id, label: id, words: [] };
   }
 };
 
 // Function to save dictionary data
-export const saveDictionary = async (name: string, data: Partial<Dictionary>, language?: SupportedLanguage): Promise<boolean> => {
-  try {
-    const lang = language || getCurrentLanguage();
-    
-    // Create the dictionary data object
-    const dictionaryData = {
-      name,
-      language: lang,
-      words: data.words || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Convert to JSON string
-    const jsonData = JSON.stringify(dictionaryData, null, 2);
-    
-    // Create a blob
-    const blob = new Blob([jsonData], { type: 'application/json' });
-    
-    // Create a download link
-    const a = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    a.href = url;
-    a.download = `dictionary_${lang}_${name}.json`;
-    
-    // Trigger download
-    document.body.appendChild(a);
-    a.click();
-    
-    // Cleanup
-    URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    
-    // Also store in localStorage for quick access
-    localStorage.setItem(`dictionary_${lang}_${name}`, jsonData);
-    
-    // Update created dictionaries list
-    const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
-    if (!createdDictionaries.includes(name)) {
-      createdDictionaries.push(name);
-      localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(createdDictionaries));
-    }
-    
-    return true;
-  } catch (error) {
-    console.error(`Error saving dictionary ${name}:`, error);
-    return false;
+export const saveDictionary = (id: string, words: string[], language?: string): void => {
+  const lang = language || getCurrentLanguage();
+  const dictionary: Dictionary = {
+    id,
+    label: id,
+    words: words
+  };
+  
+  // Save to localStorage
+  localStorage.setItem(`dictionary_${lang}_${id}`, JSON.stringify(words));
+  
+  // Update list of created dictionaries
+  const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
+  if (!createdDictionaries.includes(id)) {
+    createdDictionaries.push(id);
+    localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(createdDictionaries));
   }
+  
+  // Create and download JSON file
+  const blob = new Blob([JSON.stringify(dictionary, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${id}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 // Get combined words from file and localStorage with language support
-export const getDictionaryWords = async (name: string, language?: SupportedLanguage): Promise<string[]> => {
+export const getDictionaryWords = async (id: string, language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
-  const fileDict = await loadDictionary(name, lang);
+  const fileDict = await loadDictionary(id, lang);
   const fileWords = fileDict?.words || [];
   
   // Check localStorage for additional words
-  const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+  const localWords = localStorage.getItem(`dictionary_${lang}_${id}`);
   let parsedLocalWords: string[] = [];
   
   if (localWords) {
@@ -131,26 +106,14 @@ export const getDictionaryWords = async (name: string, language?: SupportedLangu
 };
 
 // Remove word from dictionary
-export const removeWordFromDictionary = async (name: string, wordToRemove: string, language?: SupportedLanguage): Promise<boolean> => {
+export const removeWordFromDictionary = async (dictionaryId: string, word: string): Promise<void> => {
   try {
-    const lang = language || getCurrentLanguage();
-    
-    // Get existing words
-    const words = await getDictionaryWords(name, lang);
-    
-    // Filter out the word to remove
-    const updatedWords = words.filter(word => word !== wordToRemove);
-    
-    // If nothing changed, word wasn't found
-    if (words.length === updatedWords.length) {
-      return false;
-    }
-    
-    // Save back to storage
-    return await saveDictionary(name, { words: updatedWords }, lang);
+    const words = await getDictionaryWords(dictionaryId);
+    const updatedWords = words.filter(w => w !== word);
+    await saveDictionary(dictionaryId, updatedWords);
   } catch (error) {
-    console.error(`Error removing word from dictionary ${name}:`, error);
-    return false;
+    console.error(`Error removing word from dictionary ${dictionaryId}:`, error);
+    throw error;
   }
 };
 
@@ -163,39 +126,60 @@ const getDisplayName = (filename: string): string => {
 };
 
 // Discover all dictionary files with language support
-export const discoverDictionaries = async (language?: SupportedLanguage): Promise<{ id: string; label: string }[]> => {
-  const lang = language || getCurrentLanguage();
-  let dictionaries: { id: string; label: string }[] = [];
-
+export const discoverDictionaries = async (lang: SupportedLanguage): Promise<Dictionary[]> => {
+  const dictionaries: Dictionary[] = [];
+  const basePath = `/data/${lang}`;
+  
   try {
-    // Get available dictionaries
-    const potentialDictionaries = await getPotentialDictionaries(lang);
-    
-    // Add each dictionary file
-    for (const id of potentialDictionaries) {
-      dictionaries.push({
-        id,
-        label: getDisplayName(id)
-      });
-    }
+    const dictionaryFiles = {
+      fr: [
+        'survie.json', 'telerealite.json', 'viande.json', 'police.json',
+        'randonnee.json', 'startup.json', 'paranormal.json', 'philosophie.json',
+        'photo.json', 'latin.json', 'outil.json', 'hipster.json', 'it.json',
+        'jeu.json', 'fantasy.json', 'cyberpunk.json', 'developpement.json',
+        'biere.json', 'cuisine.json'
+      ],
+      en: [
+        'survival.json', 'realityTV.json', 'meat.json', 'police.json',
+        'hiking.json', 'startup.json', 'paranormal.json', 'philosophy.json',
+        'photo.json', 'latin.json', 'tool.json', 'hipster.json', 'it.json',
+        'game.json', 'fantasy.json', 'cyberpunk.json', 'development.json',
+        'beer.json', 'cooking.json'
+      ],
+      es: [
+        'supervivencia.json', 'telerealidad.json', 'carne.json', 'policía.json',
+        'senderismo.json', 'startup.json', 'paranormal.json', 'filosofía.json',
+        'photo.json', 'latin.json', 'herramienta.json', 'hipster.json', 'it.json',
+        'juego.json', 'fantasy.json', 'cyberpunk.json', 'desarrollo.json',
+        'cerveza.json', 'cocina.json'
+      ]
+    };
 
-    // Add any created dictionaries from localStorage
-    const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
-    for (const dictName of createdDictionaries) {
-      if (!dictionaries.some(d => d.id === dictName)) {
-        dictionaries.push({
-          id: dictName,
-          label: getDisplayName(dictName)
-        });
+    const files = dictionaryFiles[lang as keyof typeof dictionaryFiles] || [];
+    
+    for (const file of files) {
+      try {
+        const response = await fetch(`${basePath}/${file}`);
+        if (response.ok) {
+          const data = await response.json();
+          const id = file.replace('.json', '');
+          dictionaries.push({
+            id,
+            label: id,
+            words: data.words || [],
+            description: data.description || ''
+          });
+        }
+      } catch (error) {
+        console.error(`Error loading dictionary ${file}:`, error);
       }
     }
-
-    return dictionaries;
   } catch (error) {
     console.error('Error discovering dictionaries:', error);
-    return [];
   }
-};
+
+  return dictionaries;
+}
 
 // Get all available dictionaries with metadata
 export const getAllDictionaries = async (language?: SupportedLanguage): Promise<{ id: string; label: string; count: number }[]> => {
@@ -223,12 +207,12 @@ export const getAllDictionaries = async (language?: SupportedLanguage): Promise<
 };
 
 // Create a new dictionary with language support
-export const createDictionary = async (name: string, words: string[], language?: SupportedLanguage): Promise<boolean> => {
+export const createDictionary = async (id: string, words: string[], language?: SupportedLanguage): Promise<boolean> => {
   try {
     const lang = language || getCurrentLanguage();
     
-    // Generate a slug from the dictionary name
-    const slug = name
+    // Generate a slug from the dictionary id
+    const slug = id
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -248,81 +232,43 @@ export const createDictionary = async (name: string, words: string[], language?:
     
     return true;
   } catch (error) {
-    console.error(`Error creating dictionary ${name}:`, error);
+    console.error(`Error creating dictionary ${id}:`, error);
     return false;
   }
 };
 
 // Add words to an existing dictionary
-export const addWordsToDictionary = async (name: string, newWords: string[], language?: SupportedLanguage): Promise<boolean> => {
+export const addWordsToDictionary = async (dictionaryId: string, newWords: string[]): Promise<void> => {
   try {
-    const lang = language || getCurrentLanguage();
-    
-    // Get existing words
-    const existingWords = await getDictionaryWords(name, lang);
-    
-    // Combine and deduplicate
-    const combinedWords = [...existingWords, ...newWords];
-    const uniqueWords = [...new Set(combinedWords)];
-    
-    // Save back to storage
-    return await saveDictionary(name, { words: uniqueWords }, lang);
+    const existingWords = await getDictionaryWords(dictionaryId);
+    const uniqueWords = [...new Set([...existingWords, ...newWords])];
+    await saveDictionary(dictionaryId, uniqueWords);
   } catch (error) {
-    console.error(`Error adding words to dictionary ${name}:`, error);
-    return false;
+    console.error(`Error adding words to dictionary ${dictionaryId}:`, error);
+    throw error;
   }
 };
 
 // Function to import dictionary from file
-export const importDictionary = async (file: File): Promise<boolean> => {
+export const importDictionary = async (file: File): Promise<void> => {
   try {
-    const reader = new FileReader();
+    const text = await file.text();
+    const data = JSON.parse(text);
     
-    return new Promise((resolve, reject) => {
-      reader.onload = async (e) => {
-        try {
-          const content = e.target?.result as string;
-          const dictionaryData = JSON.parse(content);
-          
-          if (!dictionaryData.name || !dictionaryData.language || !dictionaryData.words) {
-            throw new Error('Invalid dictionary format');
-          }
-          
-          // Save to localStorage
-          localStorage.setItem(
-            `dictionary_${dictionaryData.language}_${dictionaryData.name}`,
-            JSON.stringify(dictionaryData)
-          );
-          
-          // Update created dictionaries list
-          const createdDictionaries = JSON.parse(
-            localStorage.getItem(`created_dictionaries_${dictionaryData.language}`) || '[]'
-          );
-          if (!createdDictionaries.includes(dictionaryData.name)) {
-            createdDictionaries.push(dictionaryData.name);
-            localStorage.setItem(
-              `created_dictionaries_${dictionaryData.language}`,
-              JSON.stringify(createdDictionaries)
-            );
-          }
-          
-          resolve(true);
-        } catch (error) {
-          console.error('Error importing dictionary:', error);
-          reject(error);
-        }
-      };
-      
-      reader.onerror = (error) => {
-        console.error('Error reading file:', error);
-        reject(error);
-      };
-      
-      reader.readAsText(file);
-    });
+    if (!data.id || !data.label || !Array.isArray(data.words)) {
+      throw new Error('Invalid dictionary format');
+    }
+    
+    const dictionary: Dictionary = {
+      id: data.id,
+      label: data.label,
+      words: data.words
+    };
+    
+    await saveDictionary(dictionary.id, dictionary.words);
   } catch (error) {
-    console.error('Error in importDictionary:', error);
-    return false;
+    console.error('Error importing dictionary:', error);
+    throw error;
   }
 };
 

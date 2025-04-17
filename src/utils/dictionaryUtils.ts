@@ -281,53 +281,81 @@ const dictionaryDisplayNames: Record<SupportedLanguage, Record<string, string>> 
   }
 };
 
+// Function to get display name from filename
+const getDisplayName = (filename: string, lang: SupportedLanguage): string => {
+  // Remove .json extension
+  const name = filename.replace('.json', '');
+  
+  // Special case for latin
+  if (name === 'latin') {
+    return lang === 'fr' ? 'Latin' : 
+           lang === 'en' ? 'Latin' : 
+           'Latín';
+  }
+  
+  // For other dictionaries, use the filename as is
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
+
 // Discover all dictionary files with language support - check if files actually exist
-export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
+export const discoverDictionaries = async (language?: SupportedLanguage): Promise<{ id: string; label: string }[]> => {
   const lang = language || getCurrentLanguage();
-  let availableDictionaries: string[] = [];
+  let availableDictionaries: { id: string; label: string }[] = [];
   
-  // Get the dictionary name mappings for the current language
-  const mappings = dictionaryNameMappings[lang];
-  
-  // Check which dictionaries actually exist for the current language
-  for (const [frName, localizedName] of Object.entries(mappings)) {
+  try {
+    // First check latin dictionary in root
     try {
-      // Latin is in the root directory, so handle it specially
-      if (frName === 'latin') {
-        try {
-          await import(`../components/loremipsum/data/latin.json`);
-          availableDictionaries.push('latin');
-        } catch (e) {
-          // Latin dictionary not found
-        }
-      } else {
-        // For other dictionaries, check in language-specific folder
-        try {
-          await import(`../components/loremipsum/data/${lang}/${localizedName}.json`);
-          availableDictionaries.push(frName); // We use the French name as the ID
-        } catch (e) {
-          // Dictionary not found for this language
-        }
+      await import(`../components/loremipsum/data/latin.json`);
+      availableDictionaries.push({
+        id: 'latin',
+        label: getDisplayName('latin', lang)
+      });
+    } catch (e) {
+      // Latin dictionary not found
+    }
+    
+    // Then check language-specific dictionaries
+    try {
+      // Get all files in the language directory
+      const files = await import.meta.glob(`../components/loremipsum/data/${lang}/*.json`);
+      
+      // Convert to array of { id, label }
+      const dictionaries = Object.keys(files).map(file => {
+        const filename = file.split('/').pop() || '';
+        const id = filename.replace('.json', '');
+        return {
+          id,
+          label: getDisplayName(filename, lang)
+        };
+      });
+      
+      availableDictionaries = [...availableDictionaries, ...dictionaries];
+    } catch (e) {
+      console.error('Error reading language directory:', e);
+    }
+    
+    // Get created dictionaries from localStorage
+    const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
+    let createdDictionaries: { id: string; label: string }[] = [];
+    
+    if (createdDictionariesJSON) {
+      try {
+        const ids = JSON.parse(createdDictionariesJSON);
+        createdDictionaries = ids.map((id: string) => ({
+          id,
+          label: id.charAt(0).toUpperCase() + id.slice(1)
+        }));
+      } catch (e) {
+        console.error('Error parsing created dictionaries:', e);
       }
-    } catch (e) {
-      // Skip if import fails (dictionary doesn't exist)
     }
+    
+    // Combine available core dictionaries and created dictionaries
+    return [...availableDictionaries, ...createdDictionaries];
+  } catch (error) {
+    console.error('Error discovering dictionaries:', error);
+    return [];
   }
-  
-  // Get created dictionaries from localStorage
-  const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
-  let createdDictionaries: string[] = [];
-  
-  if (createdDictionariesJSON) {
-    try {
-      createdDictionaries = JSON.parse(createdDictionariesJSON);
-    } catch (e) {
-      console.error('Error parsing created dictionaries:', e);
-    }
-  }
-  
-  // Combine available core dictionaries and created dictionaries
-  return [...availableDictionaries, ...createdDictionaries];
 };
 
 // Get all available dictionaries with metadata
@@ -338,11 +366,11 @@ export const getAllDictionaries = async (language?: SupportedLanguage): Promise<
     
     // Map dictionaries to metadata objects
     const dictionariesWithMeta = await Promise.all(
-      dictionaries.map(async (id) => {
-        const words = await getDictionaryWords(id, lang);
+      dictionaries.map(async (dict) => {
+        const words = await getDictionaryWords(dict.id, lang);
         return {
-          id,
-          label: dictionaryDisplayNames[lang][id] || id.charAt(0).toUpperCase() + id.slice(1),
+          id: dict.id,
+          label: dict.label,
           count: words.length
         };
       })

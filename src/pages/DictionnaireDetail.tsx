@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { loadDictionary, saveDictionary, getDictionaryWords, removeWordFromDictionary, dictionaryDisplayNames } from "@/utils/dictionaryUtils";
+import { loadDictionary, saveDictionary, getDictionaryWords, removeWordFromDictionary, discoverDictionaries } from "@/utils/dictionaryUtils";
 import Sidebar from "@/components/layout/Sidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SaveReminder } from "@/components/ui/save-reminder";
@@ -32,8 +32,12 @@ const DictionnaireDetail = () => {
         // Get combined words from file and localStorage
         const words = await getDictionaryWords(id);
         
+        // Get the dictionary label from discoverDictionaries
+        const dictionaries = await discoverDictionaries(language);
+        const dictInfo = dictionaries.find(d => d.id === id);
+        
         setDictionary({
-          title: dictionaryDisplayNames[language][id] || id.charAt(0).toUpperCase() + id.slice(1),
+          title: dictInfo?.label || id.charAt(0).toUpperCase() + id.slice(1),
           description: `${t('dictionary.description')} "${id}"`,
           words
         });

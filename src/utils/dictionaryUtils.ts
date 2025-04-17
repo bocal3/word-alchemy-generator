@@ -161,18 +161,23 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
 
   try {
     // Get all JSON files in the language directory
-    const files = await import.meta.glob(`../components/loremipsum/data/${lang}/*.json`);
+    const response = await fetch(`/components/loremipsum/data/${lang}/`);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const links = doc.querySelectorAll('a');
     
     // Add each dictionary file
-    for (const file of Object.keys(files)) {
-      const filename = file.split('/').pop() || '';
-      const id = filename.replace('.json', '');
-      
-      dictionaries.push({
-        id,
-        label: getDisplayName(filename)
-      });
-    }
+    links.forEach(link => {
+      const filename = link.textContent;
+      if (filename && filename.endsWith('.json')) {
+        const id = filename.replace('.json', '');
+        dictionaries.push({
+          id,
+          label: getDisplayName(filename)
+        });
+      }
+    });
 
     // Add any created dictionaries from localStorage
     const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');

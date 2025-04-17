@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { LoremGenerator } from "@/components/loremipsum";
@@ -25,7 +24,7 @@ const Index = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadDictionaries();
   }, [language]);
 

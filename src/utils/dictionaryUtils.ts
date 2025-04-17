@@ -126,42 +126,16 @@ const getDisplayName = (filename: string): string => {
 };
 
 // Discover all dictionary files with language support
-export const discoverDictionaries = async (lang: SupportedLanguage): Promise<Dictionary[]> => {
-  const dictionaries: Dictionary[] = [];
-  
+export const discoverDictionaries = async (language: SupportedLanguage): Promise<string[]> => {
   try {
-    // Get all JSON files in the language directory
-    const response = await fetch(`/components/loremipsum/data/${lang}/`);
-    const text = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const links = doc.querySelectorAll('a');
-    
-    // Add each dictionary file
-    for (const link of links) {
-      const filename = link.textContent;
-      if (filename && filename.endsWith('.json')) {
-        try {
-          const id = filename.replace('.json', '');
-          const response = await fetch(`/components/loremipsum/data/${lang}/${id}.json`);
-          const data = await response.json();
-          dictionaries.push({
-            id,
-            label: id,
-            words: data.words || [],
-            description: data.description || ''
-          });
-        } catch (error) {
-          console.error(`Error loading dictionary ${filename}:`, error);
-        }
-      }
-    }
+    const path = `/src/components/loremipsum/data/${language}`;
+    const dictionaries = await import(`${path}/dictionaries.json`);
+    return dictionaries.default;
   } catch (error) {
-    console.error('Error discovering dictionaries:', error);
+    console.error(`Error loading dictionaries for language: ${language}`, error);
+    return [];
   }
-
-  return dictionaries;
-}
+};
 
 // Get all available dictionaries with metadata
 export const getAllDictionaries = async (language?: SupportedLanguage): Promise<{ id: string; label: string; count: number }[]> => {

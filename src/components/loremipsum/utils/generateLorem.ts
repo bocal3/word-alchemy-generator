@@ -159,40 +159,23 @@ export const generateLorem = async ({
  * Discover dictionaries with language support
  * Optimized to only fetch the list of available files for the current language
  */
+
+// Liste statique des fichiers JSON disponibles pour chaque langue
+const dictionaryFiles: Record<SupportedLanguage, string[]> = {
+  fr: ['survie', 'telerealite', 'viande', 'police', 'randonnee', 'startup'],
+  en: ['survival', 'realityTV', 'meat', 'police', 'hiking', 'startup'],
+  es: ['supervivencia', 'telerealidad', 'carne', 'policia', 'senderismo', 'startup'],
+};
+
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
-  let availableDictionaries: string[] = [];
+  console.log(`🔍 Debug - Langue actuelle : ${lang}`);
 
-  console.log(`🔍 Debug - Tentative de récupération des dictionnaires pour la langue : ${lang}`);
+  // Utilisez la liste statique pour récupérer les fichiers JSON
+  const availableDictionaries = dictionaryFiles[lang] || [];
+  console.log(`📂 Dictionnaires disponibles pour ${lang} :`, availableDictionaries);
 
-  try {
-    // Corrigez le chemin pour pointer vers le dossier "data"
-    const response = await fetch(`/src/components/loremipsum/data/${lang}/`);
-    if (!response.ok) {
-      console.error(`❌ Erreur lors de la récupération des fichiers pour ${lang} :`, response.statusText);
-      return [];
-    }
-
-    const text = await response.text();
-    console.log(`📂 Réponse brute du serveur pour ${lang} :`, text);
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const links = doc.querySelectorAll('a');
-
-    links.forEach(link => {
-      const filename = link.textContent;
-      if (filename && filename.endsWith('.json')) {
-        const id = filename.replace('.json', '');
-        availableDictionaries.push(id);
-        console.log(`📄 Fichier trouvé : ${id}`);
-      }
-    });
-  } catch (error) {
-    console.error('❌ Erreur lors de la récupération des dictionnaires potentiels :', error);
-  }
-
-  // Vérifiez les dictionnaires créés dans localStorage
+  // Ajoutez les dictionnaires créés dans localStorage
   const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
   let createdDictionaries: string[] = [];
   if (createdDictionariesJSON) {

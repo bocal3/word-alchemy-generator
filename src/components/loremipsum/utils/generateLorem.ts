@@ -23,13 +23,7 @@ export interface GenerateLoremParams {
   language?: SupportedLanguage;
 }
 
-// List of potential dictionaries to check
-const potentialDictionaries = [
-  'viande', 'meat', 'carne',
-  'survie', 'survival', 'supervivencia',
-  'telerealite', 'realityTV', 'telerealidad',
-  'latin'
-];
+
 
 // Function to get current language from localStorage
 const getCurrentLanguage = (): SupportedLanguage => {

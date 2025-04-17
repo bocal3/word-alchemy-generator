@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { SupportedLanguage } from '@/contexts/LanguageContext';
 
@@ -203,12 +202,15 @@ export const generateLorem = async ({
 
 /**
  * Discover dictionaries with language support
+ * Updated to check if dictionary files actually exist for the current language
  */
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
+  let availableDictionaries: string[] = [];
   
-  const coreDictionaries = [
-    'latin',
+  // Core dictionaries that might be available
+  const potentialDictionaries = [
+    'latin', // Latin is in the root directory
     'viande',
     'jeu',
     'biere',
@@ -229,6 +231,31 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
     'philosophie'
   ];
   
+  // Check which dictionaries actually exist for the current language
+  for (const dict of potentialDictionaries) {
+    try {
+      // Latin is in the root directory, so handle it specially
+      if (dict === 'latin') {
+        try {
+          await import(`../data/latin.json`);
+          availableDictionaries.push('latin');
+        } catch (e) {
+          // Latin dictionary not found
+        }
+      } else {
+        // For other dictionaries, check in language-specific folder
+        try {
+          await import(`../data/${lang}/${dict}.json`);
+          availableDictionaries.push(dict);
+        } catch (e) {
+          // Dictionary not found for this language
+        }
+      }
+    } catch (e) {
+      // Skip if import fails (dictionary doesn't exist)
+    }
+  }
+  
   // Get created dictionaries from localStorage with language prefix
   const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
   let createdDictionaries: string[] = [];
@@ -241,8 +268,8 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
     }
   }
   
-  // Combine core and created dictionaries
-  return [...coreDictionaries, ...createdDictionaries];
+  // Combine available core dictionaries and created dictionaries
+  return [...availableDictionaries, ...createdDictionaries];
 };
 
 // Custom hook to use the generator

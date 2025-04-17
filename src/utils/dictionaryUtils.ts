@@ -1,4 +1,3 @@
-
 import type { Dictionary } from "@/components/loremipsum/utils/generateLorem";
 import { SupportedLanguage } from "@/contexts/LanguageContext";
 
@@ -114,14 +113,14 @@ export const removeWordFromDictionary = async (name: string, wordToRemove: strin
   }
 };
 
-// Discover all dictionary files with language support
+// Discover all dictionary files with language support - check if files actually exist
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
+  let availableDictionaries: string[] = [];
   
-  // In a real app, we would scan the directory
-  // Here we'll use a predefined list of the core dictionaries
-  const coreDictionaries = [
-    'latin',
+  // Potential dictionaries that might be available
+  const potentialDictionaries = [
+    'latin', // Latin is in the root directory
     'viande',
     'jeu',
     'biere',
@@ -142,6 +141,31 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
     'philosophie'
   ];
   
+  // Check which dictionaries actually exist for the current language
+  for (const dict of potentialDictionaries) {
+    try {
+      // Latin is in the root directory, so handle it specially
+      if (dict === 'latin') {
+        try {
+          await import(`../components/loremipsum/data/latin.json`);
+          availableDictionaries.push('latin');
+        } catch (e) {
+          // Latin dictionary not found
+        }
+      } else {
+        // For other dictionaries, check in language-specific folder
+        try {
+          await import(`../components/loremipsum/data/${lang}/${dict}.json`);
+          availableDictionaries.push(dict);
+        } catch (e) {
+          // Dictionary not found for this language
+        }
+      }
+    } catch (e) {
+      // Skip if import fails (dictionary doesn't exist)
+    }
+  }
+  
   // Get created dictionaries from localStorage
   const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
   let createdDictionaries: string[] = [];
@@ -154,8 +178,8 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
     }
   }
   
-  // Combine core and created dictionaries
-  return [...coreDictionaries, ...createdDictionaries];
+  // Combine available core dictionaries and created dictionaries
+  return [...availableDictionaries, ...createdDictionaries];
 };
 
 // Get all available dictionaries with metadata

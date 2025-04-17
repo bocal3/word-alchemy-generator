@@ -282,76 +282,54 @@ const dictionaryDisplayNames: Record<SupportedLanguage, Record<string, string>> 
 };
 
 // Function to get display name from filename
-const getDisplayName = (filename: string, lang: SupportedLanguage): string => {
-  // Remove .json extension
-  const name = filename.replace('.json', '');
-  
-  // Special case for latin
-  if (name === 'latin') {
-    return lang === 'fr' ? 'Latin' : 
-           lang === 'en' ? 'Latin' : 
-           'Latín';
-  }
-  
-  // For other dictionaries, use the filename as is
-  return name.charAt(0).toUpperCase() + name.slice(1);
+const getDisplayName = (filename: string): string => {
+  // Remove .json extension and replace underscores with spaces
+  return filename
+    .replace('.json', '')
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 };
 
-// Discover all dictionary files with language support - check if files actually exist
+// Discover all dictionary files with language support
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<{ id: string; label: string }[]> => {
   const lang = language || getCurrentLanguage();
-  let availableDictionaries: { id: string; label: string }[] = [];
-  
+  let dictionaries: { id: string; label: string }[] = [];
+
   try {
-    // First check latin dictionary in root
-    try {
-      await import(`../components/loremipsum/data/latin.json`);
-      availableDictionaries.push({
-        id: 'latin',
-        label: getDisplayName('latin', lang)
-      });
-    } catch (e) {
-      // Latin dictionary not found
-    }
+    // Always add latin dictionary first
+    dictionaries.push({
+      id: 'latin',
+      label: 'Latin'
+    });
+
+    // Get all JSON files in the language directory
+    const files = await import.meta.glob(`../components/loremipsum/data/${lang}/*.json`);
     
-    // Then check language-specific dictionaries
-    try {
-      // Get all files in the language directory
-      const files = await import.meta.glob(`../components/loremipsum/data/${lang}/*.json`);
+    // Add each dictionary file
+    for (const file of Object.keys(files)) {
+      const filename = file.split('/').pop() || '';
+      const id = filename.replace('.json', '');
       
-      // Convert to array of { id, label }
-      const dictionaries = Object.keys(files).map(file => {
-        const filename = file.split('/').pop() || '';
-        const id = filename.replace('.json', '');
-        return {
-          id,
-          label: getDisplayName(filename, lang)
-        };
+      dictionaries.push({
+        id,
+        label: getDisplayName(filename)
       });
-      
-      availableDictionaries = [...availableDictionaries, ...dictionaries];
-    } catch (e) {
-      console.error('Error reading language directory:', e);
     }
-    
-    // Get created dictionaries from localStorage
-    const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
-    let createdDictionaries: { id: string; label: string }[] = [];
-    
-    if (createdDictionariesJSON) {
-      try {
-        const ids = JSON.parse(createdDictionariesJSON);
-        createdDictionaries = ids.map((id: string) => ({
-          id,
-          label: id.charAt(0).toUpperCase() + id.slice(1)
-        }));
-      } catch (e) {
-        console.error('Error parsing created dictionaries:', e);
+
+    // Add any created dictionaries from localStorage
+    const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
+    for (const dictName of createdDictionaries) {
+      if (!dictionaries.some(d => d.id === dictName)) {
+        dictionaries.push({
+          id: dictName,
+          label: getDisplayName(dictName)
+        });
       }
     }
-    
-    // Combine available core dictionaries and created dictionaries
-    return [...availableDictionaries, ...createdDictionaries];
+
+    return dictionaries;
   } catch (error) {
     console.error('Error discovering dictionaries:', error);
     return [];

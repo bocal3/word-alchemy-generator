@@ -44,7 +44,7 @@ export const loadDictionary = async (id: string, language?: string): Promise<Dic
   
   // If not in localStorage, try to load from language-specific JSON file
   try {
-    const module = await import(`../components/loremipsum/data/${lang}/${id}.json`);
+    const module = await import(`/components/loremipsum/data/${lang}/${id}.json`);
     return { id, label: id, words: module.words };
   } catch (error) {
     console.error(`Error loading dictionary ${id}:`, error);

@@ -52,7 +52,7 @@ const loadDictionary = async (id: string, language?: SupportedLanguage): Promise
     
     // Try to load from language-specific directory first
     try {
-      const module = await import(`../data/${lang}/${id}.json`);
+      const module = await import(`/components/loremipsum/data/${lang}/${id}.json`);
       const fileDict = module as Dictionary;
       
       // Check if we have additional words in localStorage
@@ -75,7 +75,7 @@ const loadDictionary = async (id: string, language?: SupportedLanguage): Promise
     } catch (importError) {
       // If language-specific file doesn't exist, try the default directory
       try {
-        const module = await import(`../data/${id}.json`);
+        const module = await import(`/components/loremipsum/data/${id}.json`);
         const fileDict = module as Dictionary;
         
         // Check if we have additional words in localStorage

@@ -37,12 +37,18 @@ export const loadDictionary = async (name: string, language?: SupportedLanguage)
     
     // Then try language-specific import
     try {
+      // Special case for latin dictionary
+      if (name === 'latin') {
+        const module = await import(`../components/loremipsum/data/latin.json`);
+        return module as Dictionary;
+      }
+      
+      // Load from language-specific directory
       const module = await import(`../components/loremipsum/data/${lang}/${name}.json`);
       return module as Dictionary;
-    } catch (languageError) {
-      // Fallback to default location
-      const module = await import(`../components/loremipsum/data/${name}.json`);
-      return module as Dictionary;
+    } catch (error) {
+      console.error(`Error loading dictionary ${name} for language ${lang}:`, error);
+      return null;
     }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);

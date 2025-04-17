@@ -157,38 +157,50 @@ export const generateLorem = async ({
 
 /**
  * Discover dictionaries with language support
- * Optimized to only fetch the list of available files for the current language
+ * Dynamically discover all dictionary files in the directory
  */
-// Liste statique des fichiers JSON disponibles pour chaque langue
-const dictionaryFiles: Record<SupportedLanguage, string[]> = {
-  fr: ['survie', 'telerealite', 'viande', 'police', 'randonnee', 'startup'],
-  en: ['survival', 'realityTV', 'meat', 'police', 'hiking', 'startup'],
-  es: ['supervivencia', 'telerealidad', 'carne', 'policia', 'senderismo', 'startup'],
-};
-
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
-  console.log(`🔍 Debug - Langue actuelle : ${lang}`);
-  // Utilisez la liste statique pour récupérer les fichiers JSON
-  const availableDictionaries = dictionaryFiles[lang] || [];
-  console.log(`📂 Dictionnaires disponibles pour ${lang} :`, availableDictionaries);
+  console.log(`🔍 Debug - Current language: ${lang}`);
+  let dictionaries: string[] = [];
 
-  // Ajoutez les dictionnaires créés dans localStorage
-  const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
-  let createdDictionaries: string[] = [];
-  if (createdDictionariesJSON) {
-    try {
-      createdDictionaries = JSON.parse(createdDictionariesJSON);
-      console.log(`📂 Dictionnaires créés trouvés : ${createdDictionaries}`);
-    } catch (e) {
-      console.error('❌ Erreur lors de l’analyse des dictionnaires créés :', e);
+  try {
+    const response = await fetch(`/components/loremipsum/data/${lang}/`);
+    if (!response.ok) {
+      console.error(`❌ Error fetching files for ${lang}`);
+      return [];
     }
-  }
 
-  // Combinez les dictionnaires disponibles et créés
-  const allDictionaries = [...availableDictionaries, ...createdDictionaries];
-  console.log(`✅ Liste finale des dictionnaires pour ${lang} :`, allDictionaries);
-  return allDictionaries;
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const links = doc.querySelectorAll('a');
+    links.forEach(link => {
+      const filename = link.textContent;
+      if (filename && filename.endsWith('.json')) {
+        const id = filename.replace('.json', '');
+        dictionaries.push(id);
+        console.log(`📄 Found file: ${id}`);
+      }
+    });
+
+    // Add dictionaries created in localStorage
+    const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
+    if (createdDictionariesJSON) {
+      try {
+        const createdDictionaries = JSON.parse(createdDictionariesJSON);
+        dictionaries = [...dictionaries, ...createdDictionaries];
+        console.log(`📂 Created dictionaries found: ${createdDictionaries}`);
+      } catch (e) {
+        console.error('❌ Error parsing created dictionaries:', e);
+      }
+    }
+
+    return [...new Set(dictionaries)]; // Return unique dictionaries
+  } catch (error) {
+    console.error('❌ Error discovering dictionaries:', error);
+    return [];
+  }
 };
 
 // Get potential dictionaries from files

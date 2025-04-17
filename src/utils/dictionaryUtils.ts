@@ -214,6 +214,73 @@ const dictionaryNameMappings: Record<SupportedLanguage, Record<string, string>> 
   }
 };
 
+// Dictionary display names for different languages
+const dictionaryDisplayNames: Record<SupportedLanguage, Record<string, string>> = {
+  fr: {
+    latin: 'Latin',
+    viande: 'Viande',
+    jeu: 'Jeu',
+    biere: 'Bière',
+    hipster: 'Hipster',
+    survie: 'Survie',
+    randonnee: 'Randonnée',
+    outils: 'Outils',
+    developpement: 'Développement',
+    it: 'IT',
+    police: 'Police',
+    cuisine: 'Cuisine',
+    photo: 'Photo',
+    paranormal: 'Paranormal',
+    startup: 'Startup',
+    fantasy: 'Fantasy',
+    cyberpunk: 'Cyberpunk',
+    telerealite: 'Télé-réalité',
+    philosophie: 'Philosophie'
+  },
+  en: {
+    latin: 'Latin',
+    viande: 'Meat',
+    jeu: 'Game',
+    biere: 'Beer',
+    hipster: 'Hipster',
+    survie: 'Survival',
+    randonnee: 'Hiking',
+    outils: 'Tools',
+    developpement: 'Development',
+    it: 'IT',
+    police: 'Police',
+    cuisine: 'Cooking',
+    photo: 'Photo',
+    paranormal: 'Paranormal',
+    startup: 'Startup',
+    fantasy: 'Fantasy',
+    cyberpunk: 'Cyberpunk',
+    telerealite: 'Reality TV',
+    philosophie: 'Philosophy'
+  },
+  es: {
+    latin: 'Latín',
+    viande: 'Carne',
+    jeu: 'Juego',
+    biere: 'Cerveza',
+    hipster: 'Hipster',
+    survie: 'Supervivencia',
+    randonnee: 'Senderismo',
+    outils: 'Herramientas',
+    developpement: 'Desarrollo',
+    it: 'IT',
+    police: 'Policía',
+    cuisine: 'Cocina',
+    photo: 'Foto',
+    paranormal: 'Paranormal',
+    startup: 'Startup',
+    fantasy: 'Fantasía',
+    cyberpunk: 'Cyberpunk',
+    telerealite: 'Telerrealidad',
+    philosophie: 'Filosofía'
+  }
+};
+
 // Discover all dictionary files with language support - check if files actually exist
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
@@ -275,7 +342,7 @@ export const getAllDictionaries = async (language?: SupportedLanguage): Promise<
         const words = await getDictionaryWords(id, lang);
         return {
           id,
-          label: id.charAt(0).toUpperCase() + id.slice(1),
+          label: dictionaryDisplayNames[lang][id] || id.charAt(0).toUpperCase() + id.slice(1),
           count: words.length
         };
       })

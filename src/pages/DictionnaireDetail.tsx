@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Play, Download, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { loadDictionary, saveDictionary, getDictionaryWords, removeWordFromDictionary } from "@/utils/dictionaryUtils";
+import { loadDictionary, saveDictionary, getDictionaryWords, removeWordFromDictionary, dictionaryDisplayNames } from "@/utils/dictionaryUtils";
 import Sidebar from "@/components/layout/Sidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SaveReminder } from "@/components/ui/save-reminder";
@@ -16,7 +15,7 @@ const DictionnaireDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [newWord, setNewWord] = useState("");
   const [dictionary, setDictionary] = useState<{ title: string, description: string, words: string[] }>({
     title: '',
@@ -34,7 +33,7 @@ const DictionnaireDetail = () => {
         const words = await getDictionaryWords(id);
         
         setDictionary({
-          title: id.charAt(0).toUpperCase() + id.slice(1),
+          title: dictionaryDisplayNames[language][id] || id.charAt(0).toUpperCase() + id.slice(1),
           description: `${t('dictionary.description')} "${id}"`,
           words
         });
@@ -49,7 +48,7 @@ const DictionnaireDetail = () => {
     };
     
     loadDictionaryData();
-  }, [id, toast, t]);
+  }, [id, toast, t, language]);
 
   const handleAddWord = () => {
     if (!newWord.trim()) {

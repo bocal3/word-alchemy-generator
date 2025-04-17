@@ -24,7 +24,18 @@ export const loadDictionary = async (name: string, language?: SupportedLanguage)
   try {
     const lang = language || getCurrentLanguage();
     
-    // Try language-specific import first
+    // First try to load from localStorage
+    const localData = localStorage.getItem(`dictionary_${lang}_${name}`);
+    if (localData) {
+      try {
+        const parsedData = JSON.parse(localData);
+        return { words: parsedData.words };
+      } catch (e) {
+        console.error('Error parsing localStorage dictionary:', e);
+      }
+    }
+    
+    // Then try language-specific import
     try {
       const module = await import(`../components/loremipsum/data/${lang}/${name}.json`);
       return module as Dictionary;
@@ -44,20 +55,43 @@ export const saveDictionary = async (name: string, data: Partial<Dictionary>, la
   try {
     const lang = language || getCurrentLanguage();
     
-    // In a browser environment, we can't directly write to files
-    // Here we'll use localStorage to simulate saving the dictionary
-    // In a real production app, this would call an API endpoint
+    // Create the dictionary data object
+    const dictionaryData = {
+      name,
+      language: lang,
+      words: data.words || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
     
-    // Store the dictionary in localStorage with language prefix
-    if (data.words) {
-      localStorage.setItem(`dictionary_${lang}_${name}`, JSON.stringify(data.words));
-      
-      // Add to list of created dictionaries if it's a new one
-      const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
-      if (!createdDictionaries.includes(name)) {
-        createdDictionaries.push(name);
-        localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(createdDictionaries));
-      }
+    // Convert to JSON string
+    const jsonData = JSON.stringify(dictionaryData, null, 2);
+    
+    // Create a blob
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    
+    // Create a download link
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = `dictionary_${lang}_${name}.json`;
+    
+    // Trigger download
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    // Also store in localStorage for quick access
+    localStorage.setItem(`dictionary_${lang}_${name}`, jsonData);
+    
+    // Update created dictionaries list
+    const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
+    if (!createdDictionaries.includes(name)) {
+      createdDictionaries.push(name);
+      localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(createdDictionaries));
     }
     
     return true;
@@ -113,39 +147,86 @@ export const removeWordFromDictionary = async (name: string, wordToRemove: strin
   }
 };
 
+// Dictionary name mappings for different languages
+const dictionaryNameMappings: Record<SupportedLanguage, Record<string, string>> = {
+  fr: {
+    latin: 'latin',
+    viande: 'viande',
+    jeu: 'jeu',
+    biere: 'biere',
+    hipster: 'hipster',
+    survie: 'survie',
+    randonnee: 'randonnee',
+    outils: 'outils',
+    developpement: 'developpement',
+    it: 'it',
+    police: 'police',
+    cuisine: 'cuisine',
+    photo: 'photo',
+    paranormal: 'paranormal',
+    startup: 'startup',
+    fantasy: 'fantasy',
+    cyberpunk: 'cyberpunk',
+    telerealite: 'telerealite',
+    philosophie: 'philosophie'
+  },
+  en: {
+    latin: 'latin',
+    viande: 'meat',
+    jeu: 'game',
+    biere: 'beer',
+    hipster: 'hipster',
+    survie: 'survival',
+    randonnee: 'hiking',
+    outils: 'tools',
+    developpement: 'development',
+    it: 'it',
+    police: 'police',
+    cuisine: 'cooking',
+    photo: 'photo',
+    paranormal: 'paranormal',
+    startup: 'startup',
+    fantasy: 'fantasy',
+    cyberpunk: 'cyberpunk',
+    telerealite: 'realityTV',
+    philosophie: 'philosophy'
+  },
+  es: {
+    latin: 'latin',
+    viande: 'carne',
+    jeu: 'juego',
+    biere: 'cerveza',
+    hipster: 'hipster',
+    survie: 'supervivencia',
+    randonnee: 'senderismo',
+    outils: 'herramienta',
+    developpement: 'desarrollo',
+    it: 'it',
+    police: 'policía',
+    cuisine: 'cocina',
+    photo: 'photo',
+    paranormal: 'paranormal',
+    startup: 'startup',
+    fantasy: 'fantasy',
+    cyberpunk: 'cyberpunk',
+    telerealite: 'telerealidad',
+    philosophie: 'filosofía'
+  }
+};
+
 // Discover all dictionary files with language support - check if files actually exist
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
   let availableDictionaries: string[] = [];
   
-  // Potential dictionaries that might be available
-  const potentialDictionaries = [
-    'latin', // Latin is in the root directory
-    'viande',
-    'jeu',
-    'biere',
-    'hipster',
-    'survie',
-    'randonnee',
-    'outils',
-    'developpement',
-    'it',
-    'police',
-    'cuisine',
-    'photo',
-    'paranormal',
-    'startup',
-    'fantasy',
-    'cyberpunk',
-    'telerealite',
-    'philosophie'
-  ];
+  // Get the dictionary name mappings for the current language
+  const mappings = dictionaryNameMappings[lang];
   
   // Check which dictionaries actually exist for the current language
-  for (const dict of potentialDictionaries) {
+  for (const [frName, localizedName] of Object.entries(mappings)) {
     try {
       // Latin is in the root directory, so handle it specially
-      if (dict === 'latin') {
+      if (frName === 'latin') {
         try {
           await import(`../components/loremipsum/data/latin.json`);
           availableDictionaries.push('latin');
@@ -155,8 +236,8 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
       } else {
         // For other dictionaries, check in language-specific folder
         try {
-          await import(`../components/loremipsum/data/${lang}/${dict}.json`);
-          availableDictionaries.push(dict);
+          await import(`../components/loremipsum/data/${lang}/${localizedName}.json`);
+          availableDictionaries.push(frName); // We use the French name as the ID
         } catch (e) {
           // Dictionary not found for this language
         }
@@ -254,6 +335,59 @@ export const addWordsToDictionary = async (name: string, newWords: string[], lan
     return await saveDictionary(name, { words: uniqueWords }, lang);
   } catch (error) {
     console.error(`Error adding words to dictionary ${name}:`, error);
+    return false;
+  }
+};
+
+// Function to import dictionary from file
+export const importDictionary = async (file: File): Promise<boolean> => {
+  try {
+    const reader = new FileReader();
+    
+    return new Promise((resolve, reject) => {
+      reader.onload = async (e) => {
+        try {
+          const content = e.target?.result as string;
+          const dictionaryData = JSON.parse(content);
+          
+          if (!dictionaryData.name || !dictionaryData.language || !dictionaryData.words) {
+            throw new Error('Invalid dictionary format');
+          }
+          
+          // Save to localStorage
+          localStorage.setItem(
+            `dictionary_${dictionaryData.language}_${dictionaryData.name}`,
+            JSON.stringify(dictionaryData)
+          );
+          
+          // Update created dictionaries list
+          const createdDictionaries = JSON.parse(
+            localStorage.getItem(`created_dictionaries_${dictionaryData.language}`) || '[]'
+          );
+          if (!createdDictionaries.includes(dictionaryData.name)) {
+            createdDictionaries.push(dictionaryData.name);
+            localStorage.setItem(
+              `created_dictionaries_${dictionaryData.language}`,
+              JSON.stringify(createdDictionaries)
+            );
+          }
+          
+          resolve(true);
+        } catch (error) {
+          console.error('Error importing dictionary:', error);
+          reject(error);
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        reject(error);
+      };
+      
+      reader.readAsText(file);
+    });
+  } catch (error) {
+    console.error('Error in importDictionary:', error);
     return false;
   }
 };

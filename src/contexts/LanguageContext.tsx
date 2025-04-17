@@ -65,6 +65,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'dictionary.thematic': 'Thematic dictionary',
     'dictionary.dev': 'Development',
     'dictionary.cuisine': 'Cooking',
+    'dictionary.import': 'Import Dictionary',
+    'dictionary.export': 'Export Dictionary',
     
     // Create dictionary
     'create.title': 'Create a new dictionary',
@@ -112,7 +114,10 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'alert.config.success': 'Configuration saved',
     'alert.config.success.message': 'Your configuration has been saved in the browser.',
     'alert.config.error': 'Configuration error',
-    'alert.config.error.message': 'Unable to save the configuration'
+    'alert.config.error.message': 'Unable to save the configuration',
+    'alert.import.success': 'Dictionary imported successfully',
+    'alert.import.error': 'Error importing dictionary',
+    'alert.export.info': 'Dictionary will be downloaded automatically when saved',
   },
   fr: {
     // Common
@@ -159,6 +164,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'dictionary.thematic': 'Dictionnaire thématique',
     'dictionary.dev': 'Développement',
     'dictionary.cuisine': 'Cuisine',
+    'dictionary.import': 'Importer un dictionnaire',
+    'dictionary.export': 'Exporter un dictionnaire',
     
     // Create dictionary
     'create.title': 'Créer un nouveau dictionnaire',
@@ -206,7 +213,10 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'alert.config.success': 'Configuration sauvegardée',
     'alert.config.success.message': 'Votre configuration a été sauvegardée dans le navigateur.',
     'alert.config.error': 'Erreur de configuration',
-    'alert.config.error.message': 'Impossible de sauvegarder la configuration'
+    'alert.config.error.message': 'Impossible de sauvegarder la configuration',
+    'alert.import.success': 'Dictionnaire importé avec succès',
+    'alert.import.error': 'Erreur lors de l\'import du dictionnaire',
+    'alert.export.info': 'Le dictionnaire sera téléchargé automatiquement lors de la sauvegarde',
   },
   es: {
     // Common
@@ -253,6 +263,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'dictionary.thematic': 'Diccionario temático',
     'dictionary.dev': 'Desarrollo',
     'dictionary.cuisine': 'Cocina',
+    'dictionary.import': 'Importar diccionario',
+    'dictionary.export': 'Exportar diccionario',
     
     // Create dictionary
     'create.title': 'Crear un nuevo diccionario',
@@ -300,7 +312,10 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'alert.config.success': 'Configuración guardada',
     'alert.config.success.message': 'Tu configuración ha sido guardada en el navegador.',
     'alert.config.error': 'Error de configuración',
-    'alert.config.error.message': 'No se pudo guardar la configuración'
+    'alert.config.error.message': 'No se pudo guardar la configuración',
+    'alert.import.success': 'Diccionario importado con éxito',
+    'alert.import.error': 'Error al importar el diccionario',
+    'alert.export.info': 'El diccionario se descargará automáticamente al guardar',
   }
 };
 

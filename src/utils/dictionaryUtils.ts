@@ -4,10 +4,15 @@ import { SupportedLanguage } from "@/contexts/LanguageContext";
 // Function to get current language
 export const getCurrentLanguage = (): SupportedLanguage => {
   const storedLang = localStorage.getItem('psum-language');
+  console.log('🌍 Debug - Langue stockée dans localStorage:', storedLang);
+  
   if (storedLang) {
     try {
       const lang = JSON.parse(storedLang) as SupportedLanguage;
-      return ['fr', 'en', 'es'].includes(lang) ? lang as SupportedLanguage : 'en';
+      console.log('🌍 Debug - Langue parsée:', lang);
+      const isValid = ['fr', 'en', 'es'].includes(lang);
+      console.log('🌍 Debug - Langue valide ?', isValid);
+      return isValid ? lang as SupportedLanguage : 'en';
     } catch (e) {
       console.error('Error parsing stored language:', e);
       return 'en';
@@ -16,7 +21,10 @@ export const getCurrentLanguage = (): SupportedLanguage => {
   
   // Default to browser language or English
   const browserLang = navigator.language.split('-')[0];
-  return ['fr', 'en', 'es'].includes(browserLang) ? browserLang as SupportedLanguage : 'en';
+  console.log('🌍 Debug - Langue du navigateur:', browserLang);
+  const isValidBrowserLang = ['fr', 'en', 'es'].includes(browserLang);
+  console.log('🌍 Debug - Langue du navigateur valide ?', isValidBrowserLang);
+  return isValidBrowserLang ? browserLang as SupportedLanguage : 'en';
 };
 
 // Function to load dictionary data with language support

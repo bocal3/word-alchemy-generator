@@ -160,24 +160,16 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   let dictionaries: { id: string; label: string }[] = [];
 
   try {
-    // Get all JSON files in the language directory
-    const response = await fetch(`/components/loremipsum/data/${lang}/`);
-    const text = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const links = doc.querySelectorAll('a');
+    // Get available dictionaries
+    const potentialDictionaries = await getPotentialDictionaries(lang);
     
     // Add each dictionary file
-    links.forEach(link => {
-      const filename = link.textContent;
-      if (filename && filename.endsWith('.json')) {
-        const id = filename.replace('.json', '');
-        dictionaries.push({
-          id,
-          label: getDisplayName(filename)
-        });
-      }
-    });
+    for (const id of potentialDictionaries) {
+      dictionaries.push({
+        id,
+        label: getDisplayName(id)
+      });
+    }
 
     // Add any created dictionaries from localStorage
     const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
@@ -323,5 +315,37 @@ export const importDictionary = async (file: File): Promise<boolean> => {
   } catch (error) {
     console.error('Error in importDictionary:', error);
     return false;
+  }
+};
+
+// Get available dictionaries based on language
+export const getPotentialDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  let dictionaries: string[] = [];
+
+  try {
+    // Get all JSON files in the language directory
+    const response = await fetch(`/components/loremipsum/data/${lang}/`);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const links = doc.querySelectorAll('a');
+    
+    // Add each dictionary file
+    links.forEach(link => {
+      const filename = link.textContent;
+      if (filename && filename.endsWith('.json')) {
+        const id = filename.replace('.json', '');
+        dictionaries.push(id);
+      }
+    });
+
+    // Add latin.json from root directory
+    dictionaries.push('latin');
+
+    return dictionaries;
+  } catch (error) {
+    console.error('Error getting potential dictionaries:', error);
+    return ['latin']; // Fallback to latin if error
   }
 };

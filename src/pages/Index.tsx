@@ -20,6 +20,9 @@ const Index = () => {
         const dicts = await discoverDictionaries(language);
         setDictionaries(dicts);
         console.log(`📚 Dictionnaires chargés :`, dicts);
+
+        // Afficher un popup avec le contenu du dossier de langue
+        alert(`📂 Contenu du dossier pour la langue "${language}" :\n\n${dicts.join('\n')}`);
       } catch (error) {
         console.error("❌ Erreur lors du chargement des dictionnaires :", error);
       } finally {

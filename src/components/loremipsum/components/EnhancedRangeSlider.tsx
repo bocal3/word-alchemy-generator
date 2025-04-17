@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Slider } from '@/components/ui/slider';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EnhancedRangeSliderProps {
   value: [number, number];
@@ -19,6 +20,8 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
   onValueChange,
   disabled = false
 }) => {
+  const { t } = useLanguage();
+
   return (
     <div className="relative pt-1">
       <Slider 
@@ -31,12 +34,10 @@ const EnhancedRangeSlider: React.FC<EnhancedRangeSliderProps> = ({
         className="mx-1.5"
       />
       <div className="flex justify-between mt-1">
-        <span className="text-xs text-muted-foreground">{min}</span>
-        <div className="flex justify-between w-full px-8">
+        <div className="flex justify-between w-full">
           <span className="text-xs text-muted-foreground">{value[0]}</span>
           <span className="text-xs text-muted-foreground">{value[1]}</span>
         </div>
-        <span className="text-xs text-muted-foreground">{max}</span>
       </div>
     </div>
   );

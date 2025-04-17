@@ -43,7 +43,10 @@ const getCurrentLanguage = (): SupportedLanguage => {
 const loadDictionary = async (id: string, language?: SupportedLanguage): Promise<Dictionary> => {
   const lang = language || getCurrentLanguage();
   try {
-    const module = await import(`./data/${lang}/${id}.json` /* webpackIgnore: true */);
+    // Ensure the path is correct and dynamic import is handled properly
+    const module = await import(`./data/${lang}/${id}.json` /* webpackIgnore: true */).catch(() => {
+      throw new Error(`Dictionary file not found: ./data/${lang}/${id}.json`);
+    });
     const fileDict = module as Dictionary;
 
     // Check if we have additional words in localStorage

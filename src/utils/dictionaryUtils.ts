@@ -329,31 +329,36 @@ export const importDictionary = async (file: File): Promise<boolean> => {
 // Get available dictionaries based on language
 export const getPotentialDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
+  console.log('🔍 Debug - Langue courante:', lang);
   let dictionaries: string[] = [];
 
   try {
-    // Get all JSON files in the language directory
-    const response = await fetch(`/components/loremipsum/data/${lang}/`);
-    const text = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const links = doc.querySelectorAll('a');
-    
-    // Add each dictionary file
-    links.forEach(link => {
-      const filename = link.textContent;
-      if (filename && filename.endsWith('.json')) {
-        const id = filename.replace('.json', '');
-        dictionaries.push(id);
-      }
-    });
+    // Liste des dictionnaires par langue
+    const dictionaryFiles = {
+      fr: [
+        'survie', 'telerealite', 'viande', 'police', 'randonnee', 'startup',
+        'paranormal', 'philosophie', 'photo', 'latin', 'outils', 'hipster',
+        'it', 'jeu', 'fantasy', 'cyberpunk', 'developpement', 'biere', 'cuisine'
+      ],
+      en: [
+        'survival', 'realityTV', 'meat', 'police', 'hiking', 'startup',
+        'paranormal', 'philosophy', 'photo', 'latin', 'tools', 'hipster',
+        'it', 'game', 'fantasy', 'cyberpunk', 'development', 'beer', 'cooking'
+      ],
+      es: [
+        'supervivencia', 'telerealidad', 'carne', 'policia', 'senderismo', 'startup',
+        'paranormal', 'filosofia', 'foto', 'latin', 'herramientas', 'hipster',
+        'it', 'juego', 'fantasia', 'cyberpunk', 'desarrollo', 'cerveza', 'cocina'
+      ]
+    };
 
-    // Add latin.json from root directory
-    dictionaries.push('latin');
+    // Récupérer les dictionnaires pour la langue courante
+    dictionaries = dictionaryFiles[lang] || ['latin'];
+    console.log('📂 Debug - Dictionnaires trouvés:', dictionaries);
 
     return dictionaries;
   } catch (error) {
-    console.error('Error getting potential dictionaries:', error);
+    console.error('❌ Debug - Erreur lors de la récupération des dictionnaires:', error);
     return ['latin']; // Fallback to latin if error
   }
 };

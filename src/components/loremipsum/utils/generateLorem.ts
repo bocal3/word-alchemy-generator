@@ -166,8 +166,8 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   console.log(`🔍 Debug - Découverte des dictionnaires pour la langue : ${lang}`);
 
   try {
-    // Fetch the list of files in the language directory
-    const response = await fetch(`/components/loremipsum/data/${lang}/`);
+    // Corrigez le chemin pour pointer vers le dossier "data"
+    const response = await fetch(`/src/components/loremipsum/data/${lang}/`);
     if (!response.ok) {
       console.error(`❌ Erreur lors de la récupération des fichiers pour ${lang}`);
       return [];

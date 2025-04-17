@@ -207,29 +207,7 @@ export const generateLorem = async ({
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
   let availableDictionaries: string[] = [];
-  
-  // Core dictionaries that might be available
-  const potentialDictionaries = [
-    'latin', // Latin is in the root directory
-    'viande',
-    'jeu',
-    'biere',
-    'hipster',
-    'survie',
-    'randonnee',
-    'outils',
-    'developpement',
-    'it',
-    'police',
-    'cuisine',
-    'photo',
-    'paranormal',
-    'startup',
-    'fantasy',
-    'cyberpunk',
-    'telerealite',
-    'philosophie'
-  ];
+
   
   // Check which dictionaries actually exist for the current language
   for (const dict of potentialDictionaries) {
@@ -270,6 +248,52 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   
   // Combine available core dictionaries and created dictionaries
   return [...availableDictionaries, ...createdDictionaries];
+};
+
+// Get available dictionaries based on language
+export const getPotentialDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  let dictionaries: string[] = [];
+
+  try {
+    // Get all JSON files in the language directory
+    const response = await fetch(`/components/loremipsum/data/${lang}/`);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const links = doc.querySelectorAll('a');
+    
+    // Add each dictionary file
+    links.forEach(link => {
+      const filename = link.textContent;
+      if (filename && filename.endsWith('.json')) {
+        const id = filename.replace('.json', '');
+        dictionaries.push(id);
+      }
+    });
+
+    // Add latin.json from root directory
+    dictionaries.push('latin');
+
+    return dictionaries;
+  } catch (error) {
+    console.error('Error getting potential dictionaries:', error);
+    return ['latin']; // Fallback to latin if error
+  }
+};
+
+// Get available dictionaries
+export const getAvailableDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
+  const lang = language || getCurrentLanguage();
+  
+  // Get potential dictionaries from files
+  const potentialDictionaries = await getPotentialDictionaries(lang);
+  
+  // Get created dictionaries from localStorage
+  const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
+  
+  // Combine and return unique dictionaries
+  return [...new Set([...potentialDictionaries, ...createdDictionaries])];
 };
 
 // Custom hook to use the generator

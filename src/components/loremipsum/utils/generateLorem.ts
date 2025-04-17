@@ -163,17 +163,19 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   const lang = language || getCurrentLanguage();
   let availableDictionaries: string[] = [];
 
-  console.log(`🔍 Debug - Découverte des dictionnaires pour la langue : ${lang}`);
+  console.log(`🔍 Debug - Tentative de récupération des dictionnaires pour la langue : ${lang}`);
 
   try {
     // Corrigez le chemin pour pointer vers le dossier "data"
     const response = await fetch(`/src/components/loremipsum/data/${lang}/`);
     if (!response.ok) {
-      console.error(`❌ Erreur lors de la récupération des fichiers pour ${lang}`);
+      console.error(`❌ Erreur lors de la récupération des fichiers pour ${lang} :`, response.statusText);
       return [];
     }
 
     const text = await response.text();
+    console.log(`📂 Réponse brute du serveur pour ${lang} :`, text);
+
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'text/html');
     const links = doc.querySelectorAll('a');

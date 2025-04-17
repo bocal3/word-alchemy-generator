@@ -128,50 +128,32 @@ const getDisplayName = (filename: string): string => {
 // Discover all dictionary files with language support
 export const discoverDictionaries = async (lang: SupportedLanguage): Promise<Dictionary[]> => {
   const dictionaries: Dictionary[] = [];
-  const basePath = `/data/${lang}`;
   
   try {
-    const dictionaryFiles = {
-      fr: [
-        'survie.json', 'telerealite.json', 'viande.json', 'police.json',
-        'randonnee.json', 'startup.json', 'paranormal.json', 'philosophie.json',
-        'photo.json', 'latin.json', 'outil.json', 'hipster.json', 'it.json',
-        'jeu.json', 'fantasy.json', 'cyberpunk.json', 'developpement.json',
-        'biere.json', 'cuisine.json'
-      ],
-      en: [
-        'survival.json', 'realityTV.json', 'meat.json', 'police.json',
-        'hiking.json', 'startup.json', 'paranormal.json', 'philosophy.json',
-        'photo.json', 'latin.json', 'tool.json', 'hipster.json', 'it.json',
-        'game.json', 'fantasy.json', 'cyberpunk.json', 'development.json',
-        'beer.json', 'cooking.json'
-      ],
-      es: [
-        'supervivencia.json', 'telerealidad.json', 'carne.json', 'policía.json',
-        'senderismo.json', 'startup.json', 'paranormal.json', 'filosofía.json',
-        'photo.json', 'latin.json', 'herramienta.json', 'hipster.json', 'it.json',
-        'juego.json', 'fantasy.json', 'cyberpunk.json', 'desarrollo.json',
-        'cerveza.json', 'cocina.json'
-      ]
-    };
-
-    const files = dictionaryFiles[lang as keyof typeof dictionaryFiles] || [];
+    // Get all JSON files in the language directory
+    const response = await fetch(`/components/loremipsum/data/${lang}/`);
+    const text = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const links = doc.querySelectorAll('a');
     
-    for (const file of files) {
-      try {
-        const response = await fetch(`${basePath}/${file}`);
-        if (response.ok) {
+    // Add each dictionary file
+    for (const link of links) {
+      const filename = link.textContent;
+      if (filename && filename.endsWith('.json')) {
+        try {
+          const id = filename.replace('.json', '');
+          const response = await fetch(`/components/loremipsum/data/${lang}/${id}.json`);
           const data = await response.json();
-          const id = file.replace('.json', '');
           dictionaries.push({
             id,
             label: id,
             words: data.words || [],
             description: data.description || ''
           });
+        } catch (error) {
+          console.error(`Error loading dictionary ${filename}:`, error);
         }
-      } catch (error) {
-        console.error(`Error loading dictionary ${file}:`, error);
       }
     }
   } catch (error) {

@@ -37,13 +37,6 @@ export const loadDictionary = async (name: string, language?: SupportedLanguage)
     
     // Then try language-specific import
     try {
-      // Special case for latin dictionary
-      if (name === 'latin') {
-        const module = await import(`../components/loremipsum/data/latin.json`);
-        return module as Dictionary;
-      }
-      
-      // Load from language-specific directory
       const module = await import(`../components/loremipsum/data/${lang}/${name}.json`);
       return module as Dictionary;
     } catch (error) {
@@ -153,7 +146,7 @@ export const removeWordFromDictionary = async (name: string, wordToRemove: strin
   }
 };
 
-// Function to get display name from filename test
+// Function to get display name from filename
 const getDisplayName = (filename: string): string => {
   // Remove .json extension and capitalize first letter
   return filename
@@ -167,12 +160,6 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   let dictionaries: { id: string; label: string }[] = [];
 
   try {
-    // Always add latin dictionary first
-    dictionaries.push({
-      id: 'latin',
-      label: 'Latin'
-    });
-
     // Get all JSON files in the language directory
     const files = await import.meta.glob(`../components/loremipsum/data/${lang}/*.json`);
     

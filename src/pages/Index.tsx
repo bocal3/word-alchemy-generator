@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { LoremGenerator } from "@/components/loremipsum";
-import { discoverDictionaries } from "@/utils/dictionaryUtils";
+import { discoverDictionaries } from "@/components/loremipsum/utils/generateLorem";
 import Sidebar from "@/components/layout/Sidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -11,22 +11,24 @@ const Index = () => {
   const [dictionaries, setDictionaries] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const selectedDictionary = location.state?.selectedDictionary;
-  
+
   useEffect(() => {
     const loadDictionaries = async () => {
+      console.log(`🌍 Langue actuelle : ${language}`);
       setIsLoading(true);
       try {
         const dicts = await discoverDictionaries(language);
         setDictionaries(dicts);
+        console.log(`📚 Dictionnaires chargés :`, dicts);
       } catch (error) {
-        console.error("Error loading dictionaries:", error);
+        console.error("❌ Erreur lors du chargement des dictionnaires :", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     loadDictionaries();
-  }, [language]);
+  }, [language]); // Recharge les dictionnaires à chaque changement de langue
 
   return (
     <div className="psum-container">

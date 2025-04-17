@@ -222,22 +222,11 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
   for (const dict of potentialDictionaries) {
     try {
       // Latin is in the root directory, so handle it specially
-      if (dict === 'latin') {
-        try {
-          await import(`../data/latin.json`);
-          availableDictionaries.push('latin');
-        } catch (e) {
-          // Latin dictionary not found
-        }
-      } else {
-        // For other dictionaries, check in language-specific folder
-        try {
-          await import(`../data/${lang}/${dict}.json`);
-          availableDictionaries.push(dict);
-        } catch (e) {
-          // Dictionary not found for this language
-        }
-      }
+      try {
+        await import(`../data/${lang}/${dict}.json`);
+        availableDictionaries.push(dict);
+      } catch (e) {
+        // Dictionary not found for this language
     } catch (e) {
       // Skip if import fails (dictionary doesn't exist)
     }

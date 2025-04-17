@@ -281,7 +281,7 @@ export const getPotentialDictionaries = async (language?: SupportedLanguage): Pr
     };
 
     // Récupérer les dictionnaires pour la langue courante
-    dictionaries = dictionaryFiles[lang] || ['latin'];
+    dictionaries = dictionaryFiles[lang];
     console.log('📂 Debug - Dictionnaires trouvés:', dictionaries);
 
     return dictionaries;

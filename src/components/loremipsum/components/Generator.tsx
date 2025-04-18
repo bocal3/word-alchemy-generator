@@ -72,9 +72,8 @@ const Generator: React.FC<GeneratorProps> = ({ initialDictionary, availableDicti
           if (initialDictionary) {
             initialSelected[dict.id] = dict.id === initialDictionary;
           } else {
-            // Default to first dictionary or latin if available
-            initialSelected[dict.id] = dictionaries.length === 1 ? true : 
-              (dict.id === 'latin' || dict.id === dictionaries[0]);
+            // Default to Latin selected
+            initialSelected[dict.id] = dict.id === 'latin';
           }
         });
         

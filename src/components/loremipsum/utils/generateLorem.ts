@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { SupportedLanguage } from '@/contexts/LanguageContext';
 
 export interface Dictionary {
-  id: string;
-  label: string;
   words: string[];
-  description?: string;
 }
 
 export interface GenerateLoremParams {
@@ -28,6 +25,7 @@ const getCurrentLanguage = (): SupportedLanguage => {
   try {
     const storedLang = localStorage.getItem('psum-language');
     if (!storedLang) return 'en';
+    
     const parsedLang = JSON.parse(storedLang) as SupportedLanguage;
     return ['fr', 'en', 'es'].includes(parsedLang) ? parsedLang : 'en';
   } catch (error) {
@@ -36,38 +34,72 @@ const getCurrentLanguage = (): SupportedLanguage => {
   }
 };
 
-/**
- * Load a dictionary by its ID and language
- * This function fetches the content of the dictionary file
- */
-const loadDictionary = async (id: string, language?: SupportedLanguage): Promise<Dictionary> => {
-  const lang = language || getCurrentLanguage();
+// Function to load dictionary data with language support
+const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary> => {
   try {
-    // Ensure the path is correct and dynamic import is handled properly
-    const module = await import(`./data/${lang}/${id}.json` /* webpackIgnore: true */).catch(() => {
-      throw new Error(`Dictionary file not found: ./data/${lang}/${id}.json`);
-    });
-    const fileDict = module as Dictionary;
-
-    // Check if we have additional words in localStorage
-    const localWords = localStorage.getItem(`dictionary_${lang}_${id}`);
-    if (localWords) {
+    const lang = language || getCurrentLanguage();
+    
+    // Try to load from language-specific directory first
+    try {
+      const module = await import(`../data/${lang}/${name}.json`);
+      const fileDict = module as Dictionary;
+      
+      // Check if we have additional words in localStorage
+      const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+      if (localWords) {
+        try {
+          const parsedLocalWords = JSON.parse(localWords);
+          return { 
+            words: [...fileDict.words, ...parsedLocalWords] 
+          };
+        } catch (e) {
+          console.error('Error parsing localStorage dictionary:', e);
+          return fileDict;
+        }
+      }
+      
+      return fileDict;
+    } catch (importError) {
+      // If language-specific file doesn't exist, try the default directory
       try {
-        const parsedLocalWords = JSON.parse(localWords);
-        return {
-          id,
-          label: id,
-          words: [...fileDict.words, ...parsedLocalWords],
-        };
-      } catch (e) {
-        console.error('❌ Error parsing words from localStorage:', e);
-        return { id, label: id, words: fileDict.words };
+        const module = await import(`../data/${name}.json`);
+        const fileDict = module as Dictionary;
+        
+        // Check if we have additional words in localStorage
+        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+        if (localWords) {
+          try {
+            const parsedLocalWords = JSON.parse(localWords);
+            return { 
+              words: [...fileDict.words, ...parsedLocalWords] 
+            };
+          } catch (e) {
+            console.error('Error parsing localStorage dictionary:', e);
+            return fileDict;
+          }
+        }
+        
+        return fileDict;
+      } catch (defaultImportError) {
+        // If no file exists, check localStorage only
+        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+        if (localWords) {
+          try {
+            const parsedWords = JSON.parse(localWords);
+            return { words: parsedWords };
+          } catch (e) {
+            console.error('Error parsing localStorage dictionary:', e);
+            return { words: [] };
+          }
+        }
+        
+        // No file and no localStorage data
+        return { words: [] };
       }
     }
-    return { id, label: id, words: fileDict.words };
   } catch (error) {
-    console.error(`❌ Error loading dictionary ${id} for ${lang}:`, error);
-    return { id, label: id, words: [] };
+    console.error(`Error loading dictionary ${name}:`, error);
+    return { words: [] };
   }
 };
 
@@ -75,54 +107,61 @@ const loadDictionary = async (id: string, language?: SupportedLanguage): Promise
 const generateRandomSentence = (words: string[], minWords: number = 5, maxWords: number = 15): string => {
   const sentenceLength = Math.floor(Math.random() * (maxWords - minWords + 1)) + minWords;
   let sentence = '';
+  
   for (let i = 0; i < sentenceLength; i++) {
     const randomWord = words[Math.floor(Math.random() * words.length)];
+    
+    // Capitalize the first word of the sentence
     if (i === 0) {
       sentence += randomWord.charAt(0).toUpperCase() + randomWord.slice(1);
     } else {
       sentence += randomWord;
     }
-    if (i < sentenceLength - 1) {
-      sentence += Math.random() < 0.1 ? ', ' : ' ';
+    
+    // Add comma randomly (but not as the last character)
+    if (i < sentenceLength - 1 && Math.random() < 0.1) {
+      sentence += ', ';
+    } else if (i < sentenceLength - 1) {
+      sentence += ' ';
     }
   }
+  
+  // Add period at the end of the sentence
   sentence += '.';
+  
   return sentence;
 };
 
 // Main function to generate lorem ipsum text
-export const generateLorem = async ({
+export const generateLorem = async ({ 
   selectedDictionaries, 
   paragraphCount,
   wordsPerSentence,
   sentencesPerParagraph,
   generateSingleSentence = false,
-  language,
+  language
 }: GenerateLoremParams): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
+  
   // Get the names of selected dictionaries
   const dictNames = Object.entries(selectedDictionaries)
     .filter(([_, isSelected]) => isSelected)
     .map(([name]) => name);
+  
   if (dictNames.length === 0) {
     return ['Please select at least one dictionary.'];
   }
+
   // Load all selected dictionaries
-  const loadedDictionaries = await Promise.all(
-    dictNames.map(async (name) => {
-      try {
-        return await loadDictionary(name, lang);
-      } catch (error) {
-        console.warn(`⚠️ Dictionnaire manquant ou inaccessible : ${name}`);
-        return { id: name, label: name, words: [] }; // Retourne un dictionnaire vide
-      }
-    })
-  );
+  const loadedDictionaries = await Promise.all(dictNames.map(name => loadDictionary(name, lang)));
+  
   // Combine all words from selected dictionaries
   const allWords = loadedDictionaries.flatMap(dict => dict.words || []);
+  
   if (allWords.length === 0) {
     return ['No words found in selected dictionaries.'];
   }
+
   // If we're generating just a single sentence
   if (generateSingleSentence) {
     const sentence = generateRandomSentence(
@@ -132,13 +171,16 @@ export const generateLorem = async ({
     );
     return [sentence];
   }
+
   // Generate paragraphs
   const paragraphs = [];
+  
   for (let p = 0; p < paragraphCount; p++) {
     // Each paragraph has between min to max sentences
     const sentenceCount = Math.floor(Math.random() * 
       (sentencesPerParagraph.max - sentencesPerParagraph.min + 1)) + 
       sentencesPerParagraph.min;
+    
     let paragraph = '';
     for (let s = 0; s < sentenceCount; s++) {
       paragraph += generateRandomSentence(
@@ -146,113 +188,95 @@ export const generateLorem = async ({
         wordsPerSentence.min, 
         wordsPerSentence.max
       );
+      
       if (s < sentenceCount - 1) {
         paragraph += ' ';
       }
     }
+    
     paragraphs.push(paragraph);
   }
+  
   return paragraphs;
 };
 
 /**
  * Discover dictionaries with language support
- * Dynamically discover all dictionary files in the directory
+ * Updated to check if dictionary files actually exist for the current language
  */
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
-  console.log(`🔍 Debug - Current language: ${lang}`);
-  let dictionaries: string[] = [];
-
-  try {
-    const response = await fetch(`/components/loremipsum/data/${lang}/`);
-    if (!response.ok) {
-      console.error(`❌ Error fetching files for ${lang}`);
-      return [];
-    }
-
-    const text = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const links = doc.querySelectorAll('a');
-    links.forEach(link => {
-      const filename = link.textContent;
-      if (filename && filename.endsWith('.json')) {
-        const id = filename.replace('.json', '');
-        dictionaries.push(id);
-        console.log(`📄 Found file: ${id}`);
+  let availableDictionaries: string[] = [];
+  
+  // Core dictionaries that might be available
+  const potentialDictionaries = [
+    'latin', // Latin is in the root directory
+    'viande',
+    'jeu',
+    'biere',
+    'hipster',
+    'survie',
+    'randonnee',
+    'outils',
+    'developpement',
+    'it',
+    'police',
+    'cuisine',
+    'photo',
+    'paranormal',
+    'startup',
+    'fantasy',
+    'cyberpunk',
+    'telerealite',
+    'philosophie'
+  ];
+  
+  // Check which dictionaries actually exist for the current language
+  for (const dict of potentialDictionaries) {
+    try {
+      // Latin is in the root directory, so handle it specially
+      if (dict === 'latin') {
+        try {
+          await import(`../data/latin.json`);
+          availableDictionaries.push('latin');
+        } catch (e) {
+          // Latin dictionary not found
+        }
+      } else {
+        // For other dictionaries, check in language-specific folder
+        try {
+          await import(`../data/${lang}/${dict}.json`);
+          availableDictionaries.push(dict);
+        } catch (e) {
+          // Dictionary not found for this language
+        }
       }
-    });
-
-    // Add dictionaries created in localStorage
-    const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
-    if (createdDictionariesJSON) {
-      try {
-        const createdDictionaries = JSON.parse(createdDictionariesJSON);
-        dictionaries = [...dictionaries, ...createdDictionaries];
-        console.log(`📂 Created dictionaries found: ${createdDictionaries}`);
-      } catch (e) {
-        console.error('❌ Error parsing created dictionaries:', e);
-      }
+    } catch (e) {
+      // Skip if import fails (dictionary doesn't exist)
     }
-
-    return [...new Set(dictionaries)]; // Return unique dictionaries
-  } catch (error) {
-    console.error('❌ Error discovering dictionaries:', error);
-    return [];
   }
-};
-
-// Get potential dictionaries from files
-export const getPotentialDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
-  const lang = language || getCurrentLanguage();
-  console.log('🔍 Debug - Langue courante pour les dictionnaires potentiels :', lang);
-  let dictionaries: string[] = [];
-
-  try {
-    const response = await fetch(`/components/loremipsum/data/${lang}/`);
-    if (!response.ok) {
-      console.error(`❌ Erreur lors de la récupération des fichiers pour ${lang}`);
-      return [];
+  
+  // Get created dictionaries from localStorage with language prefix
+  const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
+  let createdDictionaries: string[] = [];
+  
+  if (createdDictionariesJSON) {
+    try {
+      createdDictionaries = JSON.parse(createdDictionariesJSON);
+    } catch (e) {
+      console.error('Error parsing created dictionaries:', e);
     }
-
-    const text = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    const links = doc.querySelectorAll('a');
-    links.forEach(link => {
-      const filename = link.textContent;
-      if (filename && filename.endsWith('.json')) {
-        const id = filename.replace('.json', '');
-        dictionaries.push(id);
-        console.log(`📄 Fichier trouvé : ${id}`);
-      }
-    });
-
-    return dictionaries;
-  } catch (error) {
-    console.error('❌ Erreur lors de la récupération des dictionnaires potentiels :', error);
-    return [];
   }
-};
-
-// Get available dictionaries from localStorage
-export const getAvailableDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
-  const lang = language || getCurrentLanguage();
-  // Get potential dictionaries from files
-  const potentialDictionaries = await getPotentialDictionaries(lang);  
-  console.log('📂 Debug - Dictionnaires potentiels:', potentialDictionaries);
-  // Get created dictionaries from localStorage
-  const createdDictionaries = JSON.parse(localStorage.getItem(`created_dictionaries_${lang}`) || '[]');
-  // Combine and return unique dictionaries
-  return [...new Set([...potentialDictionaries, ...createdDictionaries])];
+  
+  // Combine available core dictionaries and created dictionaries
+  return [...availableDictionaries, ...createdDictionaries];
 };
 
 // Custom hook to use the generator
 export const useLoremGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState<string[]>([]);
-
+  
   const generate = async (params: GenerateLoremParams) => {
     setIsGenerating(true);
     try {
@@ -265,6 +289,6 @@ export const useLoremGenerator = () => {
       setIsGenerating(false);
     }
   };
-
+  
   return { generate, isGenerating, generatedText };
 };

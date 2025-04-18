@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Play, Download, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { loadDictionary, saveDictionary, getDictionaryWords, removeWordFromDictionary, discoverDictionaries } from "@/utils/dictionaryUtils";
+import { loadDictionary, saveDictionary, getDictionaryWords, removeWordFromDictionary } from "@/utils/dictionaryUtils";
 import Sidebar from "@/components/layout/Sidebar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SaveReminder } from "@/components/ui/save-reminder";
@@ -15,7 +16,7 @@ const DictionnaireDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [newWord, setNewWord] = useState("");
   const [dictionary, setDictionary] = useState<{ title: string, description: string, words: string[] }>({
     title: '',
@@ -32,12 +33,8 @@ const DictionnaireDetail = () => {
         // Get combined words from file and localStorage
         const words = await getDictionaryWords(id);
         
-        // Get the dictionary label from discoverDictionaries
-        const dictionaries = await discoverDictionaries(language);
-        const dictInfo = dictionaries.find(d => d.id === id);
-        
         setDictionary({
-          title: dictInfo?.label || id.charAt(0).toUpperCase() + id.slice(1),
+          title: id.charAt(0).toUpperCase() + id.slice(1),
           description: `${t('dictionary.description')} "${id}"`,
           words
         });
@@ -52,7 +49,7 @@ const DictionnaireDetail = () => {
     };
     
     loadDictionaryData();
-  }, [id, toast, t, language]);
+  }, [id, toast, t]);
 
   const handleAddWord = () => {
     if (!newWord.trim()) {

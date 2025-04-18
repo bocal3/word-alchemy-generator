@@ -1,9 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 import { useLanguage, SupportedLanguage } from '@/contexts/LanguageContext';
-import { useToast } from './use-toast';
 
 const languageNames: Record<SupportedLanguage, string> = {
   en: 'English',
@@ -18,16 +18,7 @@ const languageFlags: Record<SupportedLanguage, string> = {
 };
 
 export function LanguageSelector() {
-  const { language, setLanguage } = useLanguage();
-  const { toast } = useToast();
-
-  const handleLanguageChange = (newLang: string) => {
-    setLanguage(newLang as SupportedLanguage);
-    toast({
-      title: "Langue sélectionnée",
-      description: `La langue a été changée en ${newLang.toUpperCase()}`,
-    });
-  };
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <DropdownMenu>
@@ -42,7 +33,7 @@ export function LanguageSelector() {
         {Object.entries(languageNames).map(([code, name]) => (
           <DropdownMenuItem 
             key={code}
-            onClick={() => handleLanguageChange(code as SupportedLanguage)}
+            onClick={() => setLanguage(code as SupportedLanguage)}
             className={language === code ? "bg-accent" : ""}
           >
             <span className="mr-2">{languageFlags[code as SupportedLanguage]}</span>

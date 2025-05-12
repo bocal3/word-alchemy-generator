@@ -1,4 +1,3 @@
-
 import type { Dictionary } from "@/components/loremipsum/utils/generateLorem";
 import { SupportedLanguage } from "@/contexts/LanguageContext";
 
@@ -25,27 +24,45 @@ export const getAvailableDictionaryFiles = async (language: SupportedLanguage): 
   try {
     // In a browser environment, we can't directly read the filesystem
     // Here we define the available dictionaries for each language
-    let availableDictionaries: string[] = [];
+    const commonDictionaries = [
+      'latin', 'games', 'survival', 'paranormal', 'fantasy', 'hiking',
+      'meat', 'tools', 'development', 'it', 'police', 'cuisine',
+      'photo', 'startup', 'cyberpunk', 'reality-tv', 'philosophy', 'beer'
+    ];
     
-    if (language === 'fr') {
-      // French dictionaries
-      availableDictionaries = [
-        'latin', 'viande', 'jeu', 'biere', 'hipster', 'survie',
-        'randonnee', 'outils', 'developpement', 'it', 'police',
-        'cuisine', 'photo', 'paranormal', 'startup', 'fantasy',
-        'cyberpunk', 'telerealite', 'philosophie'
-      ];
-    } else if (language === 'en') {
-      // English dictionaries - more limited selection for now
-      availableDictionaries = [
-        'latin', 'games', 'survival', 'paranormal'
-      ];
-    } else if (language === 'es') {
-      // Spanish dictionaries - more limited selection for now
-      availableDictionaries = [
-        'latin', 'juegos', 'supervivencia'
-      ];
-    }
+    // Language-specific name mappings
+    const languageMappings: Record<string, Record<string, string>> = {
+      fr: {
+        'games': 'jeu',
+        'survival': 'survie',
+        'hiking': 'randonnee',
+        'tools': 'outils',
+        'development': 'developpement',
+        'meat': 'viande',
+        'beer': 'biere',
+        'reality-tv': 'telerealite',
+        'cyberpunk': 'cyberpunk'
+      },
+      es: {
+        'games': 'juegos',
+        'survival': 'supervivencia',
+        'hiking': 'senderismo',
+        'tools': 'herramientas',
+        'development': 'desarrollo',
+        'meat': 'carne',
+        'beer': 'cerveza',
+        'reality-tv': 'telerrealidad',
+        'cyberpunk': 'ciberpunk'
+      }
+    };
+    
+    // Map dictionary names based on language
+    let availableDictionaries: string[] = commonDictionaries.map(dict => {
+      if (language !== 'en' && languageMappings[language] && languageMappings[language][dict]) {
+        return languageMappings[language][dict];
+      }
+      return dict;
+    });
     
     return availableDictionaries;
   } catch (error) {

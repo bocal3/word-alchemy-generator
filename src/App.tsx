@@ -11,6 +11,7 @@ import DictionnaireDetail from "./pages/DictionnaireDetail";
 import CreerDictionnaire from "./pages/CreerDictionnaire";
 import Configuration from "./pages/Configuration";
 import NotFound from "./pages/NotFound";
+import ApiPage from "./pages/Api";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { useEffect } from "react";
@@ -37,6 +38,12 @@ const AppContent = () => {
           <Route path="/dictionnaire/:id" element={<DictionnaireDetail />} />
           <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
           <Route path="/configuration" element={<Configuration />} />
+          
+          {/* API Routes */}
+          <Route path="/api/:lang/:dictionaries/:paragraphCount" element={<ApiPage />} />
+          <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange" element={<ApiPage />} />
+          <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange" element={<ApiPage />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

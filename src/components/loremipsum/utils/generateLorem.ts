@@ -207,27 +207,29 @@ export const generateLorem = async ({
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
   
-  const coreDictionaries = [
-    'latin',
-    'viande',
-    'jeu',
-    'biere',
-    'hipster',
-    'survie',
-    'randonnee',
-    'outils',
-    'developpement',
-    'it',
-    'police',
-    'cuisine',
-    'photo',
-    'paranormal',
-    'startup',
-    'fantasy',
-    'cyberpunk',
-    'telerealite',
-    'philosophie'
-  ];
+  // Get available dictionaries for the selected language
+  let availableDictionaries: string[] = [];
+  
+  try {
+    // Try to get dictionaries specific to the language
+    if (lang === 'fr') {
+      // French dictionaries
+      availableDictionaries = [
+        'latin', 'viande', 'jeu', 'biere', 'hipster', 'survie',
+        'randonnee', 'outils', 'developpement', 'it', 'police',
+        'cuisine', 'photo', 'paranormal', 'startup', 'fantasy',
+        'cyberpunk', 'telerealite', 'philosophie'
+      ];
+    } else if (lang === 'en') {
+      // English dictionaries 
+      availableDictionaries = ['latin']; // Example - should be expanded in a real app
+    } else if (lang === 'es') {
+      // Spanish dictionaries
+      availableDictionaries = ['latin']; // Example - should be expanded in a real app
+    }
+  } catch (error) {
+    console.error('Error loading dictionaries:', error);
+  }
   
   // Get created dictionaries from localStorage with language prefix
   const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
@@ -241,8 +243,8 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
     }
   }
   
-  // Combine core and created dictionaries
-  return [...coreDictionaries, ...createdDictionaries];
+  // Combine available and created dictionaries
+  return [...availableDictionaries, ...createdDictionaries];
 };
 
 // Custom hook to use the generator

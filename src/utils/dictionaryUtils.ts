@@ -20,6 +20,37 @@ export const getCurrentLanguage = (): SupportedLanguage => {
   return ['fr', 'en', 'es'].includes(browserLang) ? browserLang as SupportedLanguage : 'en';
 };
 
+// Get available dictionary files for the selected language
+export const getAvailableDictionaryFiles = async (language: SupportedLanguage): Promise<string[]> => {
+  try {
+    // In a browser environment, we can't directly read the filesystem
+    // Instead, we'll use a dynamic import with a specific pattern for each language
+    let availableDictionaries: string[] = [];
+    
+    if (language === 'fr') {
+      // For French, include the predefined dictionaries we know exist
+      availableDictionaries = [
+        'latin', 'viande', 'jeu', 'biere', 'hipster', 'survie',
+        'randonnee', 'outils', 'developpement', 'it', 'police',
+        'cuisine', 'photo', 'paranormal', 'startup', 'fantasy',
+        'cyberpunk', 'telerealite', 'philosophie'
+      ];
+    } else if (language === 'en') {
+      // For English, we'll assume a different set (this would need to be updated)
+      // In a real app, this would come from an API or some other source
+      availableDictionaries = ['latin']; // Minimal example - would need to be expanded
+    } else if (language === 'es') {
+      // For Spanish, we'll assume a different set
+      availableDictionaries = ['latin']; // Minimal example - would need to be expanded
+    }
+    
+    return availableDictionaries;
+  } catch (error) {
+    console.error(`Error getting available dictionaries:`, error);
+    return [];
+  }
+};
+
 // Function to load dictionary data with language support
 export const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary | null> => {
   try {
@@ -31,8 +62,13 @@ export const loadDictionary = async (name: string, language?: SupportedLanguage)
       return module as Dictionary;
     } catch (languageError) {
       // Fallback to default location
-      const module = await import(`../components/loremipsum/data/${name}.json`);
-      return module as Dictionary;
+      try {
+        const module = await import(`../components/loremipsum/data/${name}.json`);
+        return module as Dictionary;
+      } catch (defaultError) {
+        // Dictionary file doesn't exist
+        return null;
+      }
     }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);
@@ -118,29 +154,8 @@ export const removeWordFromDictionary = async (name: string, wordToRemove: strin
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
   const lang = language || getCurrentLanguage();
   
-  // In a real app, we would scan the directory
-  // Here we'll use a predefined list of the core dictionaries
-  const coreDictionaries = [
-    'latin',
-    'viande',
-    'jeu',
-    'biere',
-    'hipster',
-    'survie',
-    'randonnee',
-    'outils',
-    'developpement',
-    'it',
-    'police',
-    'cuisine',
-    'photo',
-    'paranormal',
-    'startup',
-    'fantasy',
-    'cyberpunk',
-    'telerealite',
-    'philosophie'
-  ];
+  // Get available dictionaries for the current language
+  const availableDictionaries = await getAvailableDictionaryFiles(lang);
   
   // Get created dictionaries from localStorage
   const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
@@ -154,8 +169,8 @@ export const discoverDictionaries = async (language?: SupportedLanguage): Promis
     }
   }
   
-  // Combine core and created dictionaries
-  return [...coreDictionaries, ...createdDictionaries];
+  // Combine language-specific dictionaries and created dictionaries
+  return [...availableDictionaries, ...createdDictionaries];
 };
 
 // Get all available dictionaries with metadata

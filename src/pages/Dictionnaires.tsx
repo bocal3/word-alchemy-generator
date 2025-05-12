@@ -10,7 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const Dictionnaires = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [dictionnaires, setDictionnaires] = useState<{ id: string; label: string; count: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -18,7 +18,7 @@ const Dictionnaires = () => {
     const loadDictionaries = async () => {
       setIsLoading(true);
       try {
-        const dicts = await getAllDictionaries();
+        const dicts = await getAllDictionaries(language);
         setDictionnaires(dicts);
       } catch (error) {
         console.error("Error loading dictionaries:", error);
@@ -28,7 +28,7 @@ const Dictionnaires = () => {
     };
     
     loadDictionaries();
-  }, []);
+  }, [language]);
 
   return (
     <div className="psum-container">

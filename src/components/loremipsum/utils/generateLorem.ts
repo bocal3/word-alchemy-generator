@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { SupportedLanguage } from '@/contexts/LanguageContext';
+import { loadDictionary, getCurrentLanguage, discoverDictionaries as utilsDiscoverDictionaries } from '@/utils/dictionaryUtils';
 
 export interface Dictionary {
   words: string[];
@@ -20,89 +21,6 @@ export interface GenerateLoremParams {
   generateSingleSentence?: boolean;
   language?: SupportedLanguage;
 }
-
-// Function to get current language from localStorage
-const getCurrentLanguage = (): SupportedLanguage => {
-  try {
-    const storedLang = localStorage.getItem('psum-language');
-    if (!storedLang) return 'en';
-    
-    const parsedLang = JSON.parse(storedLang) as SupportedLanguage;
-    return ['fr', 'en', 'es'].includes(parsedLang) ? parsedLang : 'en';
-  } catch (error) {
-    console.error('Error getting current language:', error);
-    return 'en';
-  }
-};
-
-// Function to load dictionary data with language support
-const loadDictionary = async (name: string, language?: SupportedLanguage): Promise<Dictionary> => {
-  try {
-    const lang = language || getCurrentLanguage();
-    
-    // Try to load from language-specific directory first
-    try {
-      const module = await import(`../data/${lang}/${name}.json`);
-      const fileDict = module as Dictionary;
-      
-      // Check if we have additional words in localStorage
-      const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
-      if (localWords) {
-        try {
-          const parsedLocalWords = JSON.parse(localWords);
-          return { 
-            words: [...fileDict.words, ...parsedLocalWords] 
-          };
-        } catch (e) {
-          console.error('Error parsing localStorage dictionary:', e);
-          return fileDict;
-        }
-      }
-      
-      return fileDict;
-    } catch (importError) {
-      // If language-specific file doesn't exist, try the default directory
-      try {
-        const module = await import(`../data/${name}.json`);
-        const fileDict = module as Dictionary;
-        
-        // Check if we have additional words in localStorage
-        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
-        if (localWords) {
-          try {
-            const parsedLocalWords = JSON.parse(localWords);
-            return { 
-              words: [...fileDict.words, ...parsedLocalWords] 
-            };
-          } catch (e) {
-            console.error('Error parsing localStorage dictionary:', e);
-            return fileDict;
-          }
-        }
-        
-        return fileDict;
-      } catch (defaultImportError) {
-        // If no file exists, check localStorage only
-        const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
-        if (localWords) {
-          try {
-            const parsedWords = JSON.parse(localWords);
-            return { words: parsedWords };
-          } catch (e) {
-            console.error('Error parsing localStorage dictionary:', e);
-            return { words: [] };
-          }
-        }
-        
-        // No file and no localStorage data
-        return { words: [] };
-      }
-    }
-  } catch (error) {
-    console.error(`Error loading dictionary ${name}:`, error);
-    return { words: [] };
-  }
-};
 
 // This function generates random sentences from the selected dictionaries
 const generateRandomSentence = (words: string[], minWords: number = 5, maxWords: number = 15): string => {
@@ -154,10 +72,14 @@ export const generateLorem = async ({
   }
 
   // Load all selected dictionaries
-  const loadedDictionaries = await Promise.all(dictNames.map(name => loadDictionary(name, lang)));
+  const loadedDictionaries = await Promise.all(
+    dictNames.map(name => loadDictionary(name, lang))
+  );
   
-  // Combine all words from selected dictionaries
-  const allWords = loadedDictionaries.flatMap(dict => dict.words || []);
+  // Filter out null dictionaries and combine all words
+  const allWords = loadedDictionaries
+    .filter(dict => dict !== null)
+    .flatMap(dict => dict?.words || []);
   
   if (allWords.length === 0) {
     return ['No words found in selected dictionaries.'];
@@ -203,48 +125,10 @@ export const generateLorem = async ({
 
 /**
  * Discover dictionaries with language support
+ * This is a wrapper around the utility function
  */
 export const discoverDictionaries = async (language?: SupportedLanguage): Promise<string[]> => {
-  const lang = language || getCurrentLanguage();
-  
-  // Get available dictionaries for the selected language
-  let availableDictionaries: string[] = [];
-  
-  try {
-    // Try to get dictionaries specific to the language
-    if (lang === 'fr') {
-      // French dictionaries
-      availableDictionaries = [
-        'latin', 'viande', 'jeu', 'biere', 'hipster', 'survie',
-        'randonnee', 'outils', 'developpement', 'it', 'police',
-        'cuisine', 'photo', 'paranormal', 'startup', 'fantasy',
-        'cyberpunk', 'telerealite', 'philosophie'
-      ];
-    } else if (lang === 'en') {
-      // English dictionaries 
-      availableDictionaries = ['latin']; // Example - should be expanded in a real app
-    } else if (lang === 'es') {
-      // Spanish dictionaries
-      availableDictionaries = ['latin']; // Example - should be expanded in a real app
-    }
-  } catch (error) {
-    console.error('Error loading dictionaries:', error);
-  }
-  
-  // Get created dictionaries from localStorage with language prefix
-  const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
-  let createdDictionaries: string[] = [];
-  
-  if (createdDictionariesJSON) {
-    try {
-      createdDictionaries = JSON.parse(createdDictionariesJSON);
-    } catch (e) {
-      console.error('Error parsing created dictionaries:', e);
-    }
-  }
-  
-  // Combine available and created dictionaries
-  return [...availableDictionaries, ...createdDictionaries];
+  return await utilsDiscoverDictionaries(language);
 };
 
 // Custom hook to use the generator

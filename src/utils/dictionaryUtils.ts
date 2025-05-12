@@ -24,11 +24,11 @@ export const getCurrentLanguage = (): SupportedLanguage => {
 export const getAvailableDictionaryFiles = async (language: SupportedLanguage): Promise<string[]> => {
   try {
     // In a browser environment, we can't directly read the filesystem
-    // Instead, we'll use a dynamic import with a specific pattern for each language
+    // Here we define the available dictionaries for each language
     let availableDictionaries: string[] = [];
     
     if (language === 'fr') {
-      // For French, include the predefined dictionaries we know exist
+      // French dictionaries
       availableDictionaries = [
         'latin', 'viande', 'jeu', 'biere', 'hipster', 'survie',
         'randonnee', 'outils', 'developpement', 'it', 'police',
@@ -36,12 +36,15 @@ export const getAvailableDictionaryFiles = async (language: SupportedLanguage): 
         'cyberpunk', 'telerealite', 'philosophie'
       ];
     } else if (language === 'en') {
-      // For English, we'll assume a different set (this would need to be updated)
-      // In a real app, this would come from an API or some other source
-      availableDictionaries = ['latin']; // Minimal example - would need to be expanded
+      // English dictionaries - more limited selection for now
+      availableDictionaries = [
+        'latin', 'games', 'survival', 'paranormal'
+      ];
     } else if (language === 'es') {
-      // For Spanish, we'll assume a different set
-      availableDictionaries = ['latin']; // Minimal example - would need to be expanded
+      // Spanish dictionaries - more limited selection for now
+      availableDictionaries = [
+        'latin', 'juegos', 'supervivencia'
+      ];
     }
     
     return availableDictionaries;
@@ -56,19 +59,27 @@ export const loadDictionary = async (name: string, language?: SupportedLanguage)
   try {
     const lang = language || getCurrentLanguage();
     
-    // Try language-specific import first
+    // Try to load from language-specific directory
     try {
       const module = await import(`../components/loremipsum/data/${lang}/${name}.json`);
       return module as Dictionary;
     } catch (languageError) {
-      // Fallback to default location
-      try {
-        const module = await import(`../components/loremipsum/data/${name}.json`);
-        return module as Dictionary;
-      } catch (defaultError) {
-        // Dictionary file doesn't exist
-        return null;
+      console.error(`Dictionary ${name} not found for language ${lang}`, languageError);
+      
+      // If we can't find it in the language folder, check user-created dictionaries
+      const localWords = localStorage.getItem(`dictionary_${lang}_${name}`);
+      if (localWords) {
+        try {
+          const parsedWords = JSON.parse(localWords);
+          return { words: parsedWords };
+        } catch (e) {
+          console.error('Error parsing localStorage dictionary:', e);
+          return null;
+        }
       }
+      
+      // No dictionary found
+      return null;
     }
   } catch (error) {
     console.error(`Error loading dictionary ${name}:`, error);
@@ -83,7 +94,6 @@ export const saveDictionary = async (name: string, data: Partial<Dictionary>, la
     
     // In a browser environment, we can't directly write to files
     // Here we'll use localStorage to simulate saving the dictionary
-    // In a real production app, this would call an API endpoint
     
     // Store the dictionary in localStorage with language prefix
     if (data.words) {

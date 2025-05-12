@@ -1,0 +1,21 @@
+
+{
+  "words": [
+    "código", "programa", "desarrollo", "software", "aplicación", "web", "móvil",
+    "frontend", "backend", "fullstack", "API", "servidor", "cliente", "base de datos",
+    "SQL", "NoSQL", "framework", "biblioteca", "librería", "función", "método",
+    "clase", "objeto", "variable", "constante", "bucle", "condición", "algoritmo",
+    "estructura", "datos", "tipo", "interfaz", "componente", "módulo", "paquete",
+    "dependencia", "versión", "git", "commit", "push", "pull", "merge", "rama", "fork",
+    "clonar", "repositorio", "despliegue", "CI/CD", "prueba", "depuración", "excepción", "error",
+    "compilación", "interpretación", "tiempo de ejecución", "refactorización", "patrón", "arquitectura",
+    "programación", "script", "IDE", "editor", "terminal", "shell", "consola",
+    "variable global", "variable local", "recursión", "sincronización", "asíncrono",
+    "multihilo", "concurrencia", "optimización", "rendimiento", "escalabilidad",
+    "versionado", "proyecto", "sprint", "ágil", "scrum", "kanban", "metodología",
+    "protocolo", "criptografía", "algoritmo de ordenación", "depuración", "benchmark",
+    "nube", "contenedor", "docker", "kubernetes", "microservicios", "orquestación",
+    "virtualización", "integración", "entrega continua", "despliegue continuo",
+    "seguridad", "vulnerabilidad", "autenticación", "autorización", "PHP", "Laravel", "React"
+  ]
+}

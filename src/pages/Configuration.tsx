@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Settings, Download, Upload, DownloadCloud, Api } from "lucide-react";
+import { Home, Library, Settings, Download, Upload, DownloadCloud, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -269,7 +269,7 @@ const Configuration = () => {
             
             <Card className="p-6 mb-6">
               <div className="flex items-center gap-2 mb-4">
-                <Api className="h-5 w-5 text-spotify" />
+                <Code className="h-5 w-5 text-spotify" />
                 <h2 className="text-xl font-bold">API</h2>
               </div>
               <p className="text-muted-foreground mb-4">

@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Home, Library, Settings, Download, Upload, DownloadCloud } from "lucide-react";
+import { Home, Library, Settings, Download, Upload, DownloadCloud, Api } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -12,6 +11,8 @@ import { Logo } from "@/components/ui/logo";
 import Sidebar from "@/components/layout/Sidebar";
 import { useLanguage, SupportedLanguage } from "@/contexts/LanguageContext";
 import { LanguageSelector } from "@/components/ui/language-selector";
+import { SaveReminder } from "@/components/ui/save-reminder";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const Configuration = () => {
   const { toast } = useToast();
@@ -248,6 +249,12 @@ const Configuration = () => {
     }
   };
 
+  const ApiExample = ({ baseUrl }: { baseUrl: string }) => (
+    <pre className="bg-muted p-4 rounded-md overflow-auto text-xs">
+      <code>{baseUrl}/api/fr/startup-fantasy/3/5-15/3-7</code>
+    </pre>
+  );
+
   return (
     <div className="psum-container">
       <div className="psum-main">
@@ -259,6 +266,55 @@ const Configuration = () => {
               <h1 className="text-3xl font-bold text-spotify">{t('config.title')}</h1>
               <LanguageSelector />
             </div>
+            
+            <Card className="p-6 mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Api className="h-5 w-5 text-spotify" />
+                <h2 className="text-xl font-bold">API</h2>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                {t('alert.api.info')}
+              </p>
+              
+              <h3 className="font-semibold mb-2">{t('api.format')}</h3>
+              <div className="bg-muted p-4 rounded-md mb-4 overflow-auto">
+                <code className="text-sm">/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange</code>
+              </div>
+              
+              <div className="grid gap-4 mb-4">
+                <div>
+                  <h4 className="font-medium text-sm">{t('api.parameters')}:</h4>
+                  <ul className="list-disc list-inside space-y-1 mt-2 text-sm text-muted-foreground">
+                    <li><span className="font-mono text-primary">:lang</span> - {t('api.lang')} (en, fr, es)</li>
+                    <li><span className="font-mono text-primary">:dictionaries</span> - {t('api.dictionaries')}</li>
+                    <li><span className="font-mono text-primary">:paragraphCount</span> - {t('api.paragraphCount')} (1-50)</li>
+                    <li><span className="font-mono text-primary">:wordsRange</span> - {t('api.wordsRange')} (min-max)</li>
+                    <li><span className="font-mono text-primary">:sentencesRange</span> - {t('api.sentencesRange')} (min-max)</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <h3 className="font-semibold mb-2">{t('api.example')}</h3>
+              <ApiExample baseUrl={window.location.origin} />
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="mt-4">
+                    {t('api.testLive')}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>{t('api.title')}</DialogTitle>
+                    <DialogDescription>{t('api.description')}</DialogDescription>
+                  </DialogHeader>
+                  <iframe
+                    src={`${window.location.origin}/api/fr/startup-fantasy/2/5-15/3-7`}
+                    className="w-full h-96 border rounded-md mt-4"
+                  ></iframe>
+                </DialogContent>
+              </Dialog>
+            </Card>
             
             <Card className="p-6 mb-6">
               <h2 className="text-xl font-bold mb-4">{t('config.title')}</h2>

@@ -7,10 +7,10 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { getAllDictionaries, getDictionaryWords } from "@/utils/dictionaryUtils";
+import { getAllDictionaries, getDictionaryWords, getCurrentLanguage } from "@/utils/dictionaryUtils";
 import { Logo } from "@/components/ui/logo";
 import Sidebar from "@/components/layout/Sidebar";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, SupportedLanguage } from "@/contexts/LanguageContext";
 import { LanguageSelector } from "@/components/ui/language-selector";
 
 const Configuration = () => {
@@ -20,57 +20,93 @@ const Configuration = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const loadConfigurations = async () => {
-      setIsLoading(true);
-      try {
-        // Get all dictionaries data
-        const dictionaries = await getAllDictionaries();
-        
-        // Get created dictionaries list
-        const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
-        const createdDictionaries = createdDictionariesJSON ? JSON.parse(createdDictionariesJSON) : [];
-        
-        // Get words for each dictionary from localStorage
-        const dictionaryData: Record<string, string[]> = {};
-        
-        // Combine all data
-        dictionaries.forEach(dict => {
-          const localWords = localStorage.getItem(`dictionary_${dict.id}`);
-          if (localWords) {
-            try {
-              dictionaryData[dict.id] = JSON.parse(localWords);
-            } catch (e) {
-              console.error(`Error parsing dictionary ${dict.id}:`, e);
-            }
-          }
-        });
-        
-        // Create configuration object
-        const config = {
-          dictionaries: dictionaryData,
-          createdDictionaries: createdDictionaries
-        };
-        
-        setConfigData(JSON.stringify(config, null, 2));
-      } catch (error) {
-        console.error("Error loading configurations:", error);
-        toast({
-          title: t('alert.error'),
-          description: t('alert.config.error.message'),
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     loadConfigurations();
   }, [toast, t]);
   
-  const handleExportConfig = () => {
+  const loadConfigurations = async () => {
+    setIsLoading(true);
     try {
+      const allData = await exportAllData();
+      setConfigData(JSON.stringify(allData, null, 2));
+    } catch (error) {
+      console.error("Error loading configurations:", error);
+      toast({
+        title: t('alert.error'),
+        description: t('alert.config.error.message'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Function to gather all data for export
+  const exportAllData = async () => {
+    // Get current language
+    const currentLang = getCurrentLanguage();
+    
+    // Prepare data object for all languages
+    const allLanguageData: Record<SupportedLanguage, any> = {
+      en: {},
+      fr: {},
+      es: {}
+    };
+    
+    // Process each language
+    for (const lang of ['en', 'fr', 'es'] as SupportedLanguage[]) {
+      // Get all dictionaries for this language
+      const dictionaries = await getAllDictionaries(lang);
+      
+      // Get created dictionaries list
+      const createdDictionariesJSON = localStorage.getItem(`created_dictionaries_${lang}`);
+      const createdDictionaries = createdDictionariesJSON ? JSON.parse(createdDictionariesJSON) : [];
+      
+      // Get words for each dictionary from localStorage
+      const dictionaryData: Record<string, string[]> = {};
+      
+      // Get words for all dictionaries
+      await Promise.all(
+        dictionaries.map(async (dict) => {
+          try {
+            const words = await getDictionaryWords(dict.id, lang);
+            if (words && words.length > 0) {
+              dictionaryData[dict.id] = words;
+            }
+          } catch (e) {
+            console.error(`Error processing dictionary ${dict.id}:`, e);
+          }
+        })
+      );
+      
+      // Store data for this language
+      allLanguageData[lang] = {
+        dictionaries: dictionaryData,
+        createdDictionaries
+      };
+    }
+    
+    // Create final configuration object with all languages
+    const config = {
+      languages: allLanguageData,
+      exportDate: new Date().toISOString(),
+      appVersion: "1.0.0"
+    };
+    
+    return config;
+  };
+  
+  const handleExportConfig = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Get all data using the exportAllData function
+      const completeData = await exportAllData();
+      
+      // Convert to JSON
+      const jsonData = JSON.stringify(completeData, null, 2);
+      
       // Create a blob with the configuration data
-      const blob = new Blob([configData], { type: 'application/json' });
+      const blob = new Blob([jsonData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       
       // Create a link and trigger download
@@ -95,6 +131,8 @@ const Configuration = () => {
         description: t('alert.config.error.message'),
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -103,24 +141,49 @@ const Configuration = () => {
     if (!file) return;
     
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
+        setIsLoading(true);
         const content = e.target?.result as string;
         const config = JSON.parse(content);
         
-        // Import dictionaries
-        if (config.dictionaries) {
+        // Import dictionaries for all languages
+        if (config.languages) {
+          for (const lang of ['en', 'fr', 'es'] as SupportedLanguage[]) {
+            const langData = config.languages[lang];
+            
+            if (!langData) continue;
+            
+            // Import dictionaries for this language
+            if (langData.dictionaries) {
+              Object.entries(langData.dictionaries).forEach(([id, words]) => {
+                localStorage.setItem(`dictionary_${lang}_${id}`, JSON.stringify(words));
+              });
+            }
+            
+            // Import created dictionaries list for this language
+            if (langData.createdDictionaries) {
+              localStorage.setItem(`created_dictionaries_${lang}`, JSON.stringify(langData.createdDictionaries));
+            }
+          }
+        } 
+        // Backward compatibility with old format
+        else if (config.dictionaries) {
+          const currentLang = getCurrentLanguage();
+          
+          // Import dictionaries
           Object.entries(config.dictionaries).forEach(([id, words]) => {
-            localStorage.setItem(`dictionary_${id}`, JSON.stringify(words));
+            localStorage.setItem(`dictionary_${currentLang}_${id}`, JSON.stringify(words));
           });
+          
+          // Import created dictionaries list
+          if (config.createdDictionaries) {
+            localStorage.setItem(`created_dictionaries_${currentLang}`, JSON.stringify(config.createdDictionaries));
+          }
         }
         
-        // Import created dictionaries list
-        if (config.createdDictionaries) {
-          localStorage.setItem('created_dictionaries', JSON.stringify(config.createdDictionaries));
-        }
-        
-        setConfigData(JSON.stringify(config, null, 2));
+        // Refresh the displayed data
+        await loadConfigurations();
         
         toast({
           title: t('alert.success'),
@@ -133,6 +196,8 @@ const Configuration = () => {
           description: t('alert.config.error.message'),
           variant: "destructive"
         });
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -146,30 +211,9 @@ const Configuration = () => {
   const handleExportAllData = async () => {
     try {
       setIsLoading(true);
-      // Get all dictionaries
-      const dictionaries = await getAllDictionaries();
       
-      // Create an object to store all dictionary words
-      const allDictionaryData: Record<string, string[]> = {};
-      
-      // Fetch words for each dictionary (including both default and user-added words)
-      await Promise.all(dictionaries.map(async (dict) => {
-        const words = await getDictionaryWords(dict.id);
-        allDictionaryData[dict.id] = words;
-      }));
-      
-      // Get created dictionaries list
-      const createdDictionariesJSON = localStorage.getItem('created_dictionaries');
-      const createdDictionaries = createdDictionariesJSON ? JSON.parse(createdDictionariesJSON) : [];
-      
-      // Create a complete data object
-      const completeData = {
-        dictionaries: allDictionaryData,
-        createdDictionaries: createdDictionaries,
-        // Add any other app data that should be included
-        exportDate: new Date().toISOString(),
-        appVersion: "1.0.0"
-      };
+      // Get all data using the exportAllData function
+      const completeData = await exportAllData();
       
       // Convert to JSON
       const jsonData = JSON.stringify(completeData, null, 2);

@@ -96,25 +96,26 @@ const ApiPage = () => {
     fetchData();
   }, [lang, dictionaries, paragraphCount, wordsRange, sentencesRange]);
 
-  // By default, output plain text (no HTML)
-  // Only render HTML if format is explicitly set to 'html'
+  // By default, output text with simple <p> tags
+  // Only render full HTML if format is explicitly set to 'html'
   if (format !== 'html') {
-    // Use document.write to output only the text
+    // Use document.write to output only the text with simple <p> tags
     useEffect(() => {
       if (!loading && !error) {
-        // Clear the document and write only the text
+        // Clear the document and write only the text with <p> tags
         document.open();
         
         if (result.length > 0) {
-          document.write(result.join('\n\n'));
+          // Add <p> tags around each paragraph
+          document.write(result.map(paragraph => `<p>${paragraph}</p>`).join('\n'));
         } else {
-          document.write('No content generated');
+          document.write('<p>No content generated</p>');
         }
         
         document.close();
       } else if (!loading && error) {
         document.open();
-        document.write(`Error: ${error}`);
+        document.write(`<p>Error: ${error}</p>`);
         document.close();
       }
     }, [loading, error, result]);
@@ -140,7 +141,7 @@ const ApiPage = () => {
           Example: /api/fr/startup-fantasy/3/5-15/3-7
         </p>
         <p className="text-sm mt-2">
-          Add "/html" at the end for HTML output (e.g., /api/fr/startup-fantasy/3/5-15/3-7/html)
+          Add "/html" at the end for styled HTML output (e.g., /api/fr/startup-fantasy/3/5-15/3-7/html)
         </p>
       </div>
     );

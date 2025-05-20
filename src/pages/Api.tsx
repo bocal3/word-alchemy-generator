@@ -5,7 +5,7 @@ import { generateLorem } from '@/components/loremipsum/utils/generateLorem';
 import { SupportedLanguage } from '@/contexts/LanguageContext';
 
 const ApiPage = () => {
-  const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange, format } = useParams();
+  const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange } = useParams();
   const [result, setResult] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,66 +96,27 @@ const ApiPage = () => {
     fetchData();
   }, [lang, dictionaries, paragraphCount, wordsRange, sentencesRange]);
 
-  // By default, output text with simple <p> tags
-  // Only render full HTML if format is explicitly set to 'html'
-  if (format !== 'html') {
-    // Use document.write to output only the text with simple <p> tags
-    useEffect(() => {
-      if (!loading && !error) {
-        // Clear the document and write only the text with <p> tags
-        document.open();
-        
-        if (result.length > 0) {
-          // Add <p> tags around each paragraph
-          document.write(result.map(paragraph => `<p>${paragraph}</p>`).join('\n'));
-        } else {
-          document.write('<p>No content generated</p>');
-        }
-        
-        document.close();
-      } else if (!loading && error) {
-        document.open();
+  // Use document.write to output only the text with simple <p> tags
+  useEffect(() => {
+    if (!loading) {
+      // Clear the document and write only the text with <p> tags
+      document.open();
+      
+      if (!error && result.length > 0) {
+        // Add <p> tags around each paragraph
+        document.write(result.map(paragraph => `<p>${paragraph}</p>`).join('\n'));
+      } else if (error) {
         document.write(`<p>Error: ${error}</p>`);
-        document.close();
+      } else {
+        document.write('<p>No content generated</p>');
       }
-    }, [loading, error, result]);
-    
-    // Return empty div as React needs to return something
-    return <div></div>;
-  }
-
-  // HTML response only if format is 'html'
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 text-red-700 border border-red-200 rounded-md">
-        <h2 className="text-xl font-bold mb-2">Error</h2>
-        <p>{error}</p>
-        <p className="mt-4 text-sm">
-          Format: /api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange
-        </p>
-        <p className="text-sm">
-          Example: /api/fr/startup-fantasy/3/5-15/3-7
-        </p>
-        <p className="text-sm mt-2">
-          Add "/html" at the end for styled HTML output (e.g., /api/fr/startup-fantasy/3/5-15/3-7/html)
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-4 whitespace-pre-wrap">
-      {result.map((paragraph, index) => (
-        <p key={index} className="mb-4">
-          {paragraph}
-        </p>
-      ))}
-    </div>
-  );
+      
+      document.close();
+    }
+  }, [loading, error, result]);
+  
+  // Return empty div as React needs to return something
+  return <div></div>;
 };
 
 export default ApiPage;

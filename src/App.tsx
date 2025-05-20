@@ -39,13 +39,10 @@ const AppContent = () => {
           <Route path="/creer-dictionnaire" element={<CreerDictionnaire />} />
           <Route path="/configuration" element={<Configuration />} />
           
-          {/* API Routes - default is now plain text */}
+          {/* API Routes - always outputs paragraphs with <p> tags */}
           <Route path="/api/:lang/:dictionaries/:paragraphCount" element={<ApiPage />} />
           <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange" element={<ApiPage />} />
           <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange" element={<ApiPage />} />
-          
-          {/* API route with format option (html) */}
-          <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange/:format" element={<ApiPage />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

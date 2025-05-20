@@ -96,9 +96,10 @@ const ApiPage = () => {
     fetchData();
   }, [lang, dictionaries, paragraphCount, wordsRange, sentencesRange]);
 
-  // Check if the format parameter is 'raw'
-  if (format === 'raw') {
-    // If it's raw, use document.write to output only the text
+  // By default, output plain text (no HTML)
+  // Only render HTML if format is explicitly set to 'html'
+  if (format !== 'html') {
+    // Use document.write to output only the text
     useEffect(() => {
       if (!loading && !error) {
         // Clear the document and write only the text
@@ -122,7 +123,7 @@ const ApiPage = () => {
     return <div></div>;
   }
 
-  // Standard HTML response
+  // HTML response only if format is 'html'
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -139,7 +140,7 @@ const ApiPage = () => {
           Example: /api/fr/startup-fantasy/3/5-15/3-7
         </p>
         <p className="text-sm mt-2">
-          Add "/raw" at the end for plain text output (e.g., /api/fr/startup-fantasy/3/5-15/3-7/raw)
+          Add "/html" at the end for HTML output (e.g., /api/fr/startup-fantasy/3/5-15/3-7/html)
         </p>
       </div>
     );

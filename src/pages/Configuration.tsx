@@ -256,6 +256,12 @@ const Configuration = () => {
     </pre>
   );
 
+  const RawApiExample = ({ baseUrl }: { baseUrl: string }) => (
+    <pre className="bg-muted p-4 rounded-md overflow-auto text-xs">
+      <code>{baseUrl}/api/fr/startup-fantasy/3/5-15/3-7/raw</code>
+    </pre>
+  );
+
   return (
     <div className="psum-container">
       <div className="psum-main">
@@ -291,12 +297,16 @@ const Configuration = () => {
                     <li><span className="font-mono text-primary">:paragraphCount</span> - {t('api.paragraphCount')} (1-50)</li>
                     <li><span className="font-mono text-primary">:wordsRange</span> - {t('api.wordsRange')} (min-max)</li>
                     <li><span className="font-mono text-primary">:sentencesRange</span> - {t('api.sentencesRange')} (min-max)</li>
+                    <li><span className="font-mono text-primary">:format</span> - {"Ajouter '/raw' pour obtenir uniquement le texte brut"}</li>
                   </ul>
                 </div>
               </div>
               
               <h3 className="font-semibold mb-2">{t('api.example')}</h3>
               <ApiExample baseUrl={window.location.origin} />
+              
+              <h3 className="font-semibold mb-2 mt-4">{"Exemple pour texte brut (sans HTML)"}</h3>
+              <RawApiExample baseUrl={window.location.origin} />
               
               <Sheet>
                 <SheetTrigger asChild>
@@ -312,6 +322,14 @@ const Configuration = () => {
                   ></iframe>
                 </SheetContent>
               </Sheet>
+              
+              <Button 
+                variant="outline" 
+                className="mt-4 ml-4"
+                onClick={() => window.open(`${window.location.origin}/api/fr/startup-fantasy/2/5-15/3-7/raw`, '_blank')}
+              >
+                Tester le format texte brut
+              </Button>
             </Card>
             
             <Card className="p-6 mb-6">

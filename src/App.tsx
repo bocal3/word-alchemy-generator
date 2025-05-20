@@ -44,6 +44,9 @@ const AppContent = () => {
           <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange" element={<ApiPage />} />
           <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange" element={<ApiPage />} />
           
+          {/* New API route with raw format option */}
+          <Route path="/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange/:format" element={<ApiPage />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

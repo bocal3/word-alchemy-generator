@@ -5,7 +5,7 @@ import { generateLorem } from '@/components/loremipsum/utils/generateLorem';
 import { SupportedLanguage } from '@/contexts/LanguageContext';
 
 const ApiPage = () => {
-  const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange } = useParams();
+  const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange, format } = useParams();
   const [result, setResult] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +96,33 @@ const ApiPage = () => {
     fetchData();
   }, [lang, dictionaries, paragraphCount, wordsRange, sentencesRange]);
 
+  // Check if the format parameter is 'raw'
+  if (format === 'raw') {
+    // If it's raw, use document.write to output only the text
+    useEffect(() => {
+      if (!loading && !error) {
+        // Clear the document and write only the text
+        document.open();
+        
+        if (result.length > 0) {
+          document.write(result.join('\n\n'));
+        } else {
+          document.write('No content generated');
+        }
+        
+        document.close();
+      } else if (!loading && error) {
+        document.open();
+        document.write(`Error: ${error}`);
+        document.close();
+      }
+    }, [loading, error, result]);
+    
+    // Return empty div as React needs to return something
+    return <div></div>;
+  }
+
+  // Standard HTML response
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -110,6 +137,9 @@ const ApiPage = () => {
         </p>
         <p className="text-sm">
           Example: /api/fr/startup-fantasy/3/5-15/3-7
+        </p>
+        <p className="text-sm mt-2">
+          Add "/raw" at the end for plain text output (e.g., /api/fr/startup-fantasy/3/5-15/3-7/raw)
         </p>
       </div>
     );

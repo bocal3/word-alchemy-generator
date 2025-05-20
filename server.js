@@ -1,9 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
-// Adapte ce chemin si besoin selon l'emplacement de generateLorem
-const { generateLorem } = require('./src/components/loremipsum/utils/generateLorem');
+const { generateLorem } = require('./components/loremipsum/utils/generateLorem');
 
 const app = express();
 const PORT = 3001;
@@ -11,8 +9,8 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Nouvelle route API avec paramètres dans l'URL
-app.get('/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', async (req, res) => {
+// Route API format : /api/generate/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange
+app.get('/api/generate/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', async (req, res) => {
   try {
     const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange } = req.params;
 
@@ -31,7 +29,7 @@ app.get('/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', 
       selectedDictionaries[dict] = true;
     });
 
-    const parsedParagraphCount = paragraphCount ? parseInt(paragraphCount) : 1;
+    const parsedParagraphCount = parseInt(paragraphCount);
     if (isNaN(parsedParagraphCount) || parsedParagraphCount < 1 || parsedParagraphCount > 50) {
       throw new Error('Invalid paragraph count. Use a number between 1 and 50');
     }
@@ -64,7 +62,7 @@ app.get('/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', 
       maxSentences = max;
     }
 
-    // Génération du texte
+    // Utilisation de ton générateur
     const generatedText = await generateLorem({
       selectedDictionaries,
       paragraphCount: parsedParagraphCount,
@@ -80,9 +78,6 @@ app.get('/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', 
     res.status(400).send(`<p>Error: ${err.message}</p>`);
   }
 });
-
-// (Optionnel) Sert le frontend React si besoin
-app.use(express.static(path.join(__dirname, 'dist')));
 
 app.listen(PORT, () => {
   console.log(`API running on http://localhost:${PORT}`);

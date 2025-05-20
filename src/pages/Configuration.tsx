@@ -13,6 +13,7 @@ import { useLanguage, SupportedLanguage } from "@/contexts/LanguageContext";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { SaveReminder } from "@/components/ui/save-reminder";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Configuration = () => {
   const { toast } = useToast();
@@ -297,23 +298,20 @@ const Configuration = () => {
               <h3 className="font-semibold mb-2">{t('api.example')}</h3>
               <ApiExample baseUrl={window.location.origin} />
               
-              <Dialog>
-                <DialogTrigger asChild>
+              <Sheet>
+                <SheetTrigger asChild>
                   <Button variant="outline" className="mt-4">
                     {t('api.testLive')}
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-3xl">
-                  <DialogHeader>
-                    <DialogTitle>{t('api.title')}</DialogTitle>
-                    <DialogDescription>{t('api.description')}</DialogDescription>
-                  </DialogHeader>
+                </SheetTrigger>
+                <SheetContent className="p-0 w-full max-w-3xl">
                   <iframe
                     src={`${window.location.origin}/api/fr/startup-fantasy/2/5-15/3-7`}
-                    className="w-full h-96 border rounded-md mt-4"
+                    className="w-full h-full border-0"
+                    style={{ height: "calc(100vh - 2rem)" }}
                   ></iframe>
-                </DialogContent>
-              </Dialog>
+                </SheetContent>
+              </Sheet>
             </Card>
             
             <Card className="p-6 mb-6">

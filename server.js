@@ -11,12 +11,12 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Route API pour générer le texte
-app.get('/api/generate', async (req, res) => {
+// Nouvelle route API avec paramètres dans l'URL
+app.get('/api/generate/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', async (req, res) => {
   try {
-    const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange } = req.query;
+    const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange } = req.params;
 
-    // Validation des paramètres (reprend la logique de ton composant React)
+    // Validation des paramètres
     const language = lang;
     if (!['en', 'fr', 'es'].includes(language)) {
       throw new Error('Invalid language. Use en, fr or es');

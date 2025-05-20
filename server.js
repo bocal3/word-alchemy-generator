@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Nouvelle route API avec paramètres dans l'URL
-app.get('/api/generate/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', async (req, res) => {
+app.get('/api/:lang/:dictionaries/:paragraphCount/:wordsRange/:sentencesRange', async (req, res) => {
   try {
     const { lang, dictionaries, paragraphCount, wordsRange, sentencesRange } = req.params;
 
